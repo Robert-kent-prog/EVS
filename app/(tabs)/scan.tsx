@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import axios from "axios"; // Make sure to import axios
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -41,15 +42,31 @@ export default function ScanScreen() {
             try {
               const result = await verifyStudent(data, user?.token || "");
               router.push({
-                pathname: "../verification-result",
+                pathname: "/verification-result",
                 params: { student: JSON.stringify(result) },
               });
             } catch (error) {
+              let errorMessage = "An unknown error occurred";
+
+              // eslint-disable-next-line import/no-named-as-default-member
+              if (axios.isAxiosError(error)) {
+                if (error.response) {
+                  errorMessage = `Server error: ${error.response.status}`;
+                } else if (error.request) {
+                  errorMessage =
+                    "No response from server. Please check your connection.";
+                } else {
+                  errorMessage = error.message;
+                }
+              } else {
+                errorMessage = (error as any).message; // Changed to 'any' to avoid type error
+              }
+
               router.push({
-                pathname: "./verification-result",
-                params: { error: (error as Error).message },
+                pathname: "/verification-result",
+                params: { error: errorMessage },
               });
-            } finally {
+
               setLoading(false);
             }
           },
