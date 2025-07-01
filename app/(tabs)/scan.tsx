@@ -41,7 +41,7 @@ export default function ScanScreen() {
             try {
               const result = await verifyStudent(data, user?.token || "");
               router.push({
-                pathname: "./verification-result",
+                pathname: "../verification-result",
                 params: { student: JSON.stringify(result) },
               });
             } catch (error) {
