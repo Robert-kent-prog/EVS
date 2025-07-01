@@ -1,0 +1,27 @@
+import axios from "axios";
+
+const API_URL = "https://192.168.0.108:6000.com/api/verification";
+
+interface VerificationResponse {
+  studentId: string;
+  fullName: string;
+  academicYear: string;
+  faculty: string;
+  department: string;
+  registeredCourses: {
+    courseCode: string;
+    courseName: string;
+    isVerified: boolean;
+  }[];
+  isEligible: boolean;
+}
+
+export const verifyStudent = async (
+  code: string,
+  token: string
+): Promise<VerificationResponse> => {
+  const response = await axios.get(`${API_URL}/verify/${code}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  return response.data;
+};
