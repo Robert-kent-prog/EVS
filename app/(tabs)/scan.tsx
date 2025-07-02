@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import BarcodeScanner from "../components/BarcodeScanner";
 import { useAuth } from "../context/AuthContext";
-import { verifyStudent } from "../services/verification";
+import { verifyByExamCard } from "../services/verification";
 
 export default function ScanScreen() {
   const [scanning, setScanning] = useState(false); // Changed to false initially
@@ -40,7 +40,7 @@ export default function ScanScreen() {
           text: "Verify",
           onPress: async () => {
             try {
-              const result = await verifyStudent(data, user?.token || "");
+              const result = await verifyByExamCard(data, user?.token || "");
               router.push({
                 pathname: "/verification-result",
                 params: { student: JSON.stringify(result) },

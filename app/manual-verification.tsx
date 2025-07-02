@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { useAuth } from "./context/AuthContext";
-import { verifyStudent } from "./services/verification";
+import { verifyByStudentId } from "./services/verification";
 
 export default function ManualVerification() {
   const [regNumber, setRegNumber] = useState("");
@@ -28,7 +28,10 @@ export default function ManualVerification() {
     setError("");
 
     try {
-      const result = await verifyStudent(regNumber.trim(), user?.token || "");
+      const result = await verifyByStudentId(
+        regNumber.trim(),
+        user?.token || ""
+      );
       router.push({
         pathname: "/verification-result",
         params: { student: JSON.stringify(result) },
