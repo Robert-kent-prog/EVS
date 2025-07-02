@@ -20,6 +20,7 @@ export default function VerificationResult() {
   const router = useRouter();
   let parsedStudent = null;
   let isSuccess = false;
+  let displayMessage = "";
 
   if (typeof student === "string") {
     try {
@@ -31,7 +32,19 @@ export default function VerificationResult() {
     }
   }
 
-  const displayError = typeof error === "string" ? error : "Unknown error";
+  // Only set error message if there's actually an error
+  if (!isSuccess && typeof error === "string") {
+    if (error.includes("404")) {
+      displayMessage =
+        "Student not found. Please try using the Registration Number instead.";
+    } else if (error.includes("500")) {
+      displayMessage = "Server error. Please try again later.";
+    } else if (error.includes("No response")) {
+      displayMessage = "Network error. Please check your connection.";
+    } else {
+      displayMessage = error;
+    }
+  }
 
   const handleManualVerification = () => {
     router.push("/manual-verification");
@@ -159,16 +172,32 @@ export default function VerificationResult() {
           </>
         ) : (
           <View style={styles.errorCard}>
-            <Text style={styles.errorMessage}>{displayError}</Text>
-            <TouchableOpacity
-              style={styles.manualVerifyButton}
-              onPress={handleManualVerification}
-            >
-              <MaterialIcons name="search" size={20} color="white" />
-              <Text style={styles.manualVerifyButtonText}>
-                Verify using Registration Number
-              </Text>
-            </TouchableOpacity>
+            <Text style={styles.errorMessage}>{displayMessage}</Text>
+
+            {/* Only show manual verification option for "not found" errors */}
+            {(displayMessage.includes("not found") ||
+              displayMessage.includes("try using")) && (
+              <TouchableOpacity
+                style={styles.manualVerifyButton}
+                onPress={handleManualVerification}
+              >
+                <MaterialIcons name="search" size={20} color="white" />
+                <Text style={styles.manualVerifyButtonText}>
+                  Verify using Registration Number
+                </Text>
+              </TouchableOpacity>
+            )}
+
+            {/* Show different options for other errors */}
+            {displayMessage.includes("Network error") && (
+              <TouchableOpacity
+                style={styles.manualVerifyButton}
+                onPress={() => router.replace("/(tabs)/scan")}
+              >
+                <MaterialIcons name="refresh" size={20} color="white" />
+                <Text style={styles.manualVerifyButtonText}>Try Again</Text>
+              </TouchableOpacity>
+            )}
           </View>
         )}
 
@@ -178,7 +207,9 @@ export default function VerificationResult() {
             style={styles.secondaryButton}
             onPress={() => router.replace("/(tabs)/scan")}
           >
-            <Text style={styles.secondaryButtonText}>Scan Again</Text>
+            <Text style={styles.secondaryButtonText}>
+              {isSuccess ? "Scan Another" : "Scan Again"}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
