@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://192.168.100.25:6000/api/verification";
+const API_URL = "http://192.168.0.108:6000/api/student";
 
 interface VerificationResponse {
   studentId: string;
@@ -20,8 +20,10 @@ export const verifyStudent = async (
   code: string,
   token: string
 ): Promise<VerificationResponse> => {
-  const response = await axios.get(`${API_URL}/verify/${code}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const response = await axios.post(
+    `${API_URL}/verify`,
+    { examCardNo: code }, // Request body
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
   return response.data;
 };
