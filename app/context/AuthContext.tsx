@@ -52,6 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
 
     loadAuthState();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Verify token with backend
