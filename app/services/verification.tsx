@@ -16,13 +16,25 @@ interface VerificationResponse {
   isEligible: boolean;
 }
 
-export const verifyStudent = async (
-  code: string,
+export const verifyByExamCard = async (
+  examCardNo: string,
   token: string
 ): Promise<VerificationResponse> => {
   const response = await axios.post(
     `${API_URL}/verify`,
-    { examCardNo: code }, // Request body
+    { examCardNo },
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  return response.data;
+};
+
+export const verifyByStudentId = async (
+  studentId: string,
+  token: string
+): Promise<VerificationResponse> => {
+  const response = await axios.post(
+    `${API_URL}/verify`,
+    { studentId },
     { headers: { Authorization: `Bearer ${token}` } }
   );
   return response.data;

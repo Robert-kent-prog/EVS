@@ -1,5 +1,4 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import axios from "axios";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
@@ -9,14 +8,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
-const API_URL = "https://192.168.100.25:6000/api/student";
+import { useAuth } from "./context/AuthContext";
+import { verifyStudent } from "./services/verification";
 
 export default function ManualVerification() {
   const [regNumber, setRegNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleVerify = async () => {
     if (!regNumber.trim()) {
@@ -28,27 +28,22 @@ export default function ManualVerification() {
     setError("");
 
     try {
-      const response = await axios.post(`${API_URL}/verify`, {
-        studentId: regNumber.trim(),
-      });
-
+      const result = await verifyStudent(regNumber.trim(), user?.token || "");
       router.push({
         pathname: "/verification-result",
-        params: { student: JSON.stringify(response.data) },
+        params: { student: JSON.stringify(result) },
       });
-    } catch (err) {
+    } catch (err: any) {
       let errorMessage = "Verification failed";
-      // eslint-disable-next-line import/no-named-as-default-member
-      if (axios.isAxiosError(err)) {
-        if (err.response) {
-          errorMessage = err.response.data.error || "Student not found";
-        } else if (err.request) {
-          errorMessage =
-            "No response from server. Please check your connection.";
-        } else {
-          errorMessage = err.message;
-        }
+
+      if (err.response) {
+        errorMessage = err.response.data.error || "Student not found";
+      } else if (err.request) {
+        errorMessage = "No response from server. Please check your connection.";
+      } else {
+        errorMessage = err.message;
       }
+
       setError(errorMessage);
     } finally {
       setLoading(false);
@@ -88,6 +83,7 @@ export default function ManualVerification() {
   );
 }
 
+// Keep the same styles as before
 const styles = StyleSheet.create({
   container: {
     flex: 1,
