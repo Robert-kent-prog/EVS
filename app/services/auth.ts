@@ -9,7 +9,8 @@ interface LoginResponse {
     _id: string;
     userName: string;
     staffNo: string;
-    role: 'Invigilator' | 'admin';
+    email: string,
+    role: string;
   };
 }
 
@@ -18,22 +19,20 @@ interface RegisterResponse {
     _id: string;
     userName: string;
     staffNo: string;
-    role: 'Invigilator' | 'admin';
+    role: string;
+    email: string
   };
   message?: string;
 }
 
 export const register = async (
-  userName: string,
-  staffNo: string,
-  password: string,
-  role: 'Invigilator' | 'admin' = 'Invigilator'
-): Promise<RegisterResponse['user']> => { // Only return the user part
+userName: string, staffNo: string, password: string, email: string, role: string): Promise<RegisterResponse['user']> => { // Only return the user part
   try {
     const response = await axios.post(`${API_URL}/users`, {
       userName,
       staffNo,
       password,
+      email,
       role
     });
 
@@ -73,6 +72,7 @@ export const login = async (
         _id: response.data.user._id,
         userName: response.data.user.userName,
         staffNo: response.data.user.staffNo,
+        email: response.data.user.email,
         role: response.data.user.role
       }
     };
@@ -91,7 +91,15 @@ export const verifyToken = async (token: string): Promise<boolean> => {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.status === 200;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     return false;
   }
+};
+
+export const forgotPassword = async (staffNo: string) => {
+  const response = await axios.post(`${API_URL}/auth/forgot-password`, {
+    staffNo,
+  });
+  return response.data;
 };

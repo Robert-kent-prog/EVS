@@ -1,7 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
 import {
-  Image,
+  ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
   Platform,
@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import ForgotPasswordModal from "./ForgotPasswordModal";
 
 interface AuthFormProps {
   type: "login" | "register";
@@ -20,12 +21,14 @@ interface AuthFormProps {
     userName: string,
     staffNo: string,
     password: string,
-    role?: "Invigilator" | "admin"
+    email?: string,
+    role?: "Invigilator" // Changed to specific literal type
   ) => Promise<void>;
   loading: boolean;
   error?: string | null;
   onNavigateToLogin?: () => void;
   onNavigateToRegister?: () => void;
+  onForgotPassword?: (staffNo: string) => Promise<void>;
 }
 
 export default function AuthForm({
@@ -34,20 +37,23 @@ export default function AuthForm({
   loading,
   onNavigateToLogin,
   onNavigateToRegister,
+  onForgotPassword,
 }: AuthFormProps) {
   const [userName, setUserName] = useState("");
   const [staffNo, setStaffNo] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // New state for password visibility
-  const [role, setRole] = useState<"Invigilator" | "admin">("Invigilator");
+  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
 
   const staffNoInput = useRef<TextInput>(null);
   const passwordInput = useRef<TextInput>(null);
+  const emailInput = useRef<TextInput>(null);
 
   const handleSubmit = () => {
     Keyboard.dismiss();
     if (type === "register") {
-      onSubmit(userName, staffNo, password, role);
+      onSubmit(userName, staffNo, password, email, "Invigilator"); // Hardcoded value
     } else {
       onSubmit("", staffNo, password);
     }
@@ -57,163 +63,190 @@ export default function AuthForm({
     setShowPassword(!showPassword);
   };
 
+  const handleForgotPassword = async (staffNo: string) => {
+    try {
+      if (!onForgotPassword) {
+        throw new Error("Forgot password functionality not available");
+      }
+      await onForgotPassword(staffNo);
+      setShowForgotPasswordModal(false);
+    } catch (error) {
+      console.error("Forgot password error:", error);
+    }
+  };
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
+    <ImageBackground
+      source={require("../../assets/images/header_Image.png")}
+      style={styles.backgroundImage}
+      resizeMode="cover"
     >
-      <ScrollView
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
       >
-        <Pressable style={styles.outerArea} onPress={Keyboard.dismiss}>
-          <View style={styles.logoContainer}>
-            <Image
-              source={require("../../assets/images/header_Image.png")}
-              style={styles.headerImage}
-              resizeMode="contain"
-            />
-          </View>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Pressable style={styles.outerArea} onPress={Keyboard.dismiss}>
+            <View style={styles.header}>
+              <Text style={styles.title}>
+                {type === "login" ? "Welcome Back!" : "Create Account"}
+              </Text>
+              <Text style={styles.subtitle}>
+                {type === "login"
+                  ? "Sign in to continue"
+                  : "Fill in your details to register"}
+              </Text>
+            </View>
 
-          <View style={styles.header}>
-            <Text style={styles.title}>
-              {type === "login" ? "Welcome Back!" : "Create Account"}
-            </Text>
-            <Text style={styles.subtitle}>
-              {type === "login"
-                ? "Sign in to continue"
-                : "Fill in your details to register"}
-            </Text>
-          </View>
-
-          {type === "register" && (
-            <TextInput
-              style={styles.input}
-              placeholder="Full Name"
-              placeholderTextColor="#999"
-              value={userName}
-              onChangeText={setUserName}
-              autoCapitalize="words"
-              returnKeyType="next"
-              onSubmitEditing={() => staffNoInput.current?.focus()}
-            />
-          )}
-
-          <TextInput
-            ref={staffNoInput}
-            style={styles.input}
-            placeholder="Staff Number"
-            placeholderTextColor="#999"
-            value={staffNo}
-            onChangeText={setStaffNo}
-            autoCapitalize="none"
-            returnKeyType="next"
-            onSubmitEditing={() => passwordInput.current?.focus()}
-          />
-
-          <View style={styles.passwordContainer}>
-            <TextInput
-              ref={passwordInput}
-              style={[styles.input, styles.passwordInput]}
-              placeholder="Password"
-              placeholderTextColor="#999"
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry={!showPassword}
-              returnKeyType="done"
-              onSubmitEditing={handleSubmit}
-            />
-            <TouchableOpacity
-              style={styles.toggleButton}
-              onPress={togglePasswordVisibility}
-            >
-              <MaterialIcons
-                name={showPassword ? "visibility-off" : "visibility"}
-                size={24}
-                color="#999"
+            {type === "register" && (
+              <TextInput
+                style={styles.input}
+                placeholder="Full Name"
+                placeholderTextColor="#000000"
+                value={userName}
+                onChangeText={setUserName}
+                autoCapitalize="words"
+                returnKeyType="next"
+                onSubmitEditing={() => staffNoInput.current?.focus()}
               />
-            </TouchableOpacity>
-          </View>
+            )}
 
-          {type === "register" && (
-            <View style={styles.roleContainer}>
-              <Text style={styles.roleLabel}>Role:</Text>
+            <TextInput
+              ref={staffNoInput}
+              style={styles.input}
+              placeholder="Staff Number"
+              placeholderTextColor="#000000"
+              value={staffNo}
+              onChangeText={setStaffNo}
+              autoCapitalize="none"
+              returnKeyType="next"
+              onSubmitEditing={() =>
+                type === "register"
+                  ? emailInput.current?.focus()
+                  : passwordInput.current?.focus()
+              }
+            />
+
+            {type === "register" && (
+              <TextInput
+                ref={emailInput}
+                style={styles.input}
+                placeholder="Email Address"
+                placeholderTextColor="#000000"
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                returnKeyType="next"
+                onSubmitEditing={() => passwordInput.current?.focus()}
+              />
+            )}
+
+            <View style={styles.passwordContainer}>
+              <TextInput
+                ref={passwordInput}
+                style={[styles.input, styles.passwordInput]}
+                placeholder="Password"
+                placeholderTextColor="#000000"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                returnKeyType="done"
+                onSubmitEditing={handleSubmit}
+              />
               <TouchableOpacity
-                style={[
-                  styles.roleButton,
-                  role === "Invigilator" && styles.roleButtonActive,
-                ]}
-                onPress={() => setRole("Invigilator")}
+                style={styles.toggleButton}
+                onPress={togglePasswordVisibility}
               >
-                <Text
-                  style={[
-                    styles.roleButtonText,
-                    role === "Invigilator" && styles.roleButtonTextActive,
-                  ]}
-                >
-                  Invigilator
-                </Text>
+                <MaterialIcons
+                  name={showPassword ? "visibility-off" : "visibility"}
+                  size={24}
+                  color="#000000"
+                />
               </TouchableOpacity>
+            </View>
+
+            {type === "register" && (
+              <View style={styles.roleContainer}>
+                <Text style={styles.roleLabel}>Role:</Text>
+                <View style={[styles.roleButton, styles.roleButtonActive]}>
+                  <Text
+                    style={[styles.roleButtonText, styles.roleButtonTextActive]}
+                  >
+                    Invigilator
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            <TouchableOpacity
+              style={[styles.button, loading && styles.buttonDisabled]}
+              onPress={handleSubmit}
+              disabled={loading}
+              activeOpacity={0.8}
+            >
+              <Text style={styles.buttonText}>
+                {loading
+                  ? "Please Wait..."
+                  : type === "login"
+                  ? "Sign In"
+                  : "Sign Up"}
+              </Text>
+            </TouchableOpacity>
+
+            {type === "login" && onForgotPassword && (
               <TouchableOpacity
-                style={[
-                  styles.roleButton,
-                  role === "admin" && styles.roleButtonActive,
-                ]}
-                onPress={() => setRole("admin")}
+                style={styles.forgotPasswordButton}
+                onPress={() => setShowForgotPasswordModal(true)}
               >
-                <Text
-                  style={[
-                    styles.roleButtonText,
-                    role === "admin" && styles.roleButtonTextActive,
-                  ]}
-                >
-                  Admin
+                <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
+              </TouchableOpacity>
+            )}
+
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>
+                {type === "login"
+                  ? "Don't have an account? "
+                  : "Already have an account? "}
+              </Text>
+              <TouchableOpacity
+                onPress={
+                  type === "login" ? onNavigateToRegister : onNavigateToLogin
+                }
+              >
+                <Text style={styles.footerLink}>
+                  {type === "login" ? "Sign Up" : "Sign In"}
                 </Text>
               </TouchableOpacity>
             </View>
-          )}
+          </Pressable>
+        </ScrollView>
+      </KeyboardAvoidingView>
 
-          <TouchableOpacity
-            style={[styles.button, loading && styles.buttonDisabled]}
-            onPress={handleSubmit}
-            disabled={loading}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.buttonText}>
-              {loading
-                ? "Please Wait..."
-                : type === "login"
-                ? "Sign In"
-                : "Sign Up"}
-            </Text>
-          </TouchableOpacity>
-
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>
-              {type === "login"
-                ? "Don't have an account? "
-                : "Already have an account? "}
-            </Text>
-            <TouchableOpacity
-              onPress={
-                type === "login" ? onNavigateToRegister : onNavigateToLogin
-              }
-            >
-              <Text style={styles.footerLink}>
-                {type === "login" ? "Sign Up" : "Sign In"}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </Pressable>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      {onForgotPassword && (
+        <ForgotPasswordModal
+          visible={showForgotPasswordModal}
+          onClose={() => setShowForgotPasswordModal(false)}
+          onSubmit={handleForgotPassword}
+          loading={loading}
+        />
+      )}
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  backgroundImage: {
+    flex: 1,
+    width: "100%",
+    height: "100%",
+  },
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255,255,255,0)", // Increased transparency
   },
   scrollContainer: {
     flexGrow: 1,
@@ -224,18 +257,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     paddingTop: 20,
   },
-  logoContainer: {
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  headerImage: {
-    width: 200,
-    height: 120,
-    marginBottom: 10,
-  },
   header: {
     marginBottom: 30,
     alignItems: "center",
+    backgroundColor: "rgba(255,255,255,20)", // More opaque for better readability
+    padding: 20,
+    borderRadius: 10,
   },
   title: {
     fontSize: 28,
@@ -245,7 +272,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: "#7f8c8d",
+    color: "#555", // Darker for better contrast
     textAlign: "center",
   },
   input: {
@@ -255,21 +282,22 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     paddingHorizontal: 15,
     marginBottom: 15,
-    backgroundColor: "#f9f9f9",
+    backgroundColor: "rgba(255,255,255,0.8)", // Semi-transparent white
     fontSize: 16,
     color: "#333",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.1,
     shadowRadius: 2,
-    elevation: 1,
+    elevation: 2,
+    fontWeight: "bold",
   },
   passwordContainer: {
     position: "relative",
     marginBottom: 15,
   },
   passwordInput: {
-    paddingRight: 50, // Make space for the toggle button
+    paddingRight: 50,
   },
   toggleButton: {
     position: "absolute",
@@ -286,12 +314,12 @@ const styles = StyleSheet.create({
   roleLabel: {
     marginRight: 10,
     fontSize: 16,
-    color: "#555",
+    fontWeight: "bold",
+    color: "#fff", // Darker for better contrast
   },
   roleButton: {
     paddingVertical: 8,
     paddingHorizontal: 15,
-    marginRight: 10,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#e0e0e0",
@@ -302,7 +330,8 @@ const styles = StyleSheet.create({
     borderColor: "#3498db",
   },
   roleButtonText: {
-    color: "#555",
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 14,
   },
   roleButtonTextActive: {
@@ -316,9 +345,9 @@ const styles = StyleSheet.create({
     marginTop: 15,
     shadowColor: "#3498db",
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 6,
-    elevation: 3,
+    elevation: 5,
   },
   buttonDisabled: {
     backgroundColor: "#bdc3c7",
@@ -332,14 +361,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     marginTop: 25,
+    backgroundColor: "rgba(255,255,255,30)", // Semi-transparent background
+    padding: 10,
+    borderRadius: 10,
   },
   footerText: {
-    color: "#7f8c8d",
+    color: "#000000", // Darker for better contrast
     fontSize: 15,
+    fontWeight: "500",
   },
   footerLink: {
     color: "#3498db",
-    fontWeight: "600",
+    fontWeight: "800",
     fontSize: 15,
+  },
+  forgotPasswordButton: {
+    alignSelf: "flex-end",
+    marginTop: 10,
+    padding: 5,
+    backgroundColor: "rgba(255,255,255,30)", // Semi-transparent background
+    borderRadius: 5,
+  },
+  forgotPasswordText: {
+    color: "#3498db",
+    fontSize: 14,
+    fontWeight: "700",
   },
 });

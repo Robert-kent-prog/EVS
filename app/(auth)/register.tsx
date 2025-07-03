@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import AuthForm from "../components/AuthForm";
 import { useAuth } from "../context/AuthContext";
+
 import { login, register } from "../services/auth";
 
 export default function RegisterScreen() {
@@ -10,20 +11,18 @@ export default function RegisterScreen() {
   const { login: authLogin } = useAuth();
   const [loading, setLoading] = useState(false);
 
-  // screens/register.tsx
-  // screens/register.tsx
   const handleRegister = async (
     userName: string,
     staffNo: string,
     password: string,
-    role?: "Invigilator" | "admin"
+    email?: string,
+    role?: "Invigilator" // Match the exact type
   ) => {
     setLoading(true);
     try {
-      // 1. Register the user
-      await register(userName, staffNo, password, role);
+      // Always use "Invigilator" as the role
+      await register(userName, staffNo, email || "", password, "Invigilator");
 
-      // 2. Automatically login
       try {
         const { token, user } = await login(staffNo, password);
 
@@ -31,7 +30,7 @@ export default function RegisterScreen() {
           userId: user._id,
           userName: user.userName,
           staffNo: user.staffNo,
-          role: user.role,
+          role: "Invigilator", // Hardcoded to ensure type safety
         });
 
         router.replace("/(tabs)/home");
@@ -52,12 +51,14 @@ export default function RegisterScreen() {
       setLoading(false);
     }
   };
+
   return (
     <AuthForm
       type="register"
       onSubmit={handleRegister}
       loading={loading}
       onNavigateToLogin={() => router.replace("/(auth)/login")}
+      // No need to pass onForgotPassword for register screen
     />
   );
 }

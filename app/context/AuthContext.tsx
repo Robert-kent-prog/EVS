@@ -5,7 +5,7 @@ interface User {
   userId: string;
   userName: string;
   staffNo: string;
-  role: "Invigilator" | "admin";
+  role: "Invigilator";
   token: string;
 }
 

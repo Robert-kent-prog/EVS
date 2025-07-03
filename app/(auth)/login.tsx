@@ -4,6 +4,7 @@ import { Alert } from "react-native";
 import AuthForm from "../components/AuthForm";
 import { useAuth } from "../context/AuthContext";
 import { login } from "../services/auth";
+import api from "../services/reset"; // Make sure this path is correct
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function LoginScreen() {
   const [error, setError] = useState<string | null>(null);
 
   const handleLogin = async (
-    userName: string, // Not used in login but required by AuthForm
+    userName: string,
     staffNo: string,
     password: string
   ) => {
@@ -22,7 +23,6 @@ export default function LoginScreen() {
     try {
       const { token, user } = await login(staffNo, password);
 
-      // Ensure all required fields are present
       if (
         !token ||
         !user?._id ||
@@ -34,17 +34,14 @@ export default function LoginScreen() {
       }
 
       await authLogin(token, {
-        userId: user._id, // Using _id from MongoDB
+        userId: user._id,
         userName: user.userName,
         staffNo: user.staffNo,
-        role: user.role as "Invigilator" | "admin", // Type assertion
+        role: "Invigilator", // Hardcoded value
       });
 
-      // Clear navigation stack and go to home
       router.replace("/(tabs)/home");
     } catch (error) {
-      // console.error("Login error details:", error);
-
       let errorMessage = "An unknown error occurred";
       if (error instanceof Error) {
         errorMessage = error.message;
@@ -61,13 +58,28 @@ export default function LoginScreen() {
     }
   };
 
+  const handleForgotPassword = async (staffNo: string) => {
+    try {
+      await api.forgotPassword(staffNo);
+      Alert.alert(
+        "Reset Link Sent",
+        "Please check your email for password reset instructions"
+      );
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        "Failed to send reset link. Please try again later."
+      );
+    }
+  };
+
   return (
     <AuthForm
       type="login"
       onSubmit={handleLogin}
       loading={loading}
-      error={error}
-      onNavigateToRegister={() => router.push("/(auth)/register")}
+      onNavigateToRegister={() => router.push("/register")} // Use router.push
+      onForgotPassword={handleForgotPassword}
     />
   );
 }
