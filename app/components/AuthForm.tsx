@@ -1,6 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import React, { useRef, useState } from "react";
 import {
+  Alert,
   ImageBackground,
   Keyboard,
   KeyboardAvoidingView,
@@ -50,10 +51,33 @@ export default function AuthForm({
   const passwordInput = useRef<TextInput>(null);
   const emailInput = useRef<TextInput>(null);
 
+  // Add this function to validate fields
+  const validateFields = () => {
+    if (type === "register") {
+      return (
+        userName.trim() !== "" &&
+        staffNo.trim() !== "" &&
+        password.trim() !== "" &&
+        email.trim() !== ""
+      );
+    } else {
+      return staffNo.trim() !== "" && password.trim() !== "";
+    }
+  };
+
+  // Update the handleSubmit to check fields
   const handleSubmit = () => {
     Keyboard.dismiss();
+
+    if (!validateFields()) {
+      Alert.alert("Missing Information", "Please fill in all required fields", [
+        { text: "OK" },
+      ]);
+      return;
+    }
+
     if (type === "register") {
-      onSubmit(userName, staffNo, password, email, "Invigilator"); // Hardcoded value
+      onSubmit(userName, staffNo, password, email, "Invigilator");
     } else {
       onSubmit("", staffNo, password);
     }
@@ -183,9 +207,12 @@ export default function AuthForm({
             )}
 
             <TouchableOpacity
-              style={[styles.button, loading && styles.buttonDisabled]}
+              style={[
+                styles.button,
+                (loading || !validateFields()) && styles.buttonDisabled,
+              ]}
               onPress={handleSubmit}
-              disabled={loading}
+              disabled={loading || !validateFields()}
               activeOpacity={0.8}
             >
               <Text style={styles.buttonText}>
