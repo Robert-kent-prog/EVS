@@ -1,10 +1,10 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import axios from "axios"; // Make sure to import axios
+import axios from "axios";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
+  Modal,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -15,75 +15,68 @@ import { useAuth } from "../context/AuthContext";
 import { verifyByExamCard } from "../services/verification";
 
 export default function ScanScreen() {
-  const [scanning, setScanning] = useState(false); // Changed to false initially
+  const [scanning, setScanning] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [scannedData, setScannedData] = useState("");
   const { user } = useAuth();
   const router = useRouter();
 
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
-    if (loading || !scanning) return; // Added !scanning check
+    if (loading || !scanning) return;
 
-    setScanning(false); // Stop scanning after detection
+    setScannedData(data);
+    setShowModal(true);
+    setScanning(false);
+  };
+
+  const handleVerify = async () => {
     setLoading(true);
+    setShowModal(false);
 
     try {
-      Alert.alert("Barcode Scanned", `Student ID: ${data}`, [
-        {
-          text: "Cancel",
-          onPress: () => {
-            setLoading(false);
-            setScanning(true); // Restart scanning if canceled
-          },
-          style: "cancel",
-        },
-        {
-          text: "Verify",
-          onPress: async () => {
-            try {
-              const result = await verifyByExamCard(data, user?.token || "");
-              router.push({
-                pathname: "/verification-result",
-                params: { student: JSON.stringify(result) },
-              });
-            } catch (error) {
-              let errorMessage = "An unknown error occurred";
-
-              // eslint-disable-next-line import/no-named-as-default-member
-              if (axios.isAxiosError(error)) {
-                if (error.response) {
-                  errorMessage = `Server error: ${error.response.status}`;
-                } else if (error.request) {
-                  errorMessage =
-                    "No response from server. Please check your connection.";
-                } else {
-                  errorMessage = error.message;
-                }
-              } else {
-                errorMessage = (error as any).message; // Changed to 'any' to avoid type error
-              }
-
-              router.push({
-                pathname: "/verification-result",
-                params: { error: errorMessage },
-              });
-
-              setLoading(false);
-            }
-          },
-        },
-      ]);
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const result = await verifyByExamCard(scannedData, user?.token || "");
+      router.push({
+        pathname: "/verification-result",
+        params: { student: JSON.stringify(result) },
+      });
     } catch (error) {
-      Alert.alert("Error", "Failed to process verification");
+      let errorMessage = "An unknown error occurred";
+
+      if (axios.isAxiosError(error)) {
+        if (error.response) {
+          errorMessage = error.response.data.error || "Student not found";
+        } else if (error.request) {
+          errorMessage =
+            "No response from server. Please check your connection.";
+        } else {
+          errorMessage = error.message;
+        }
+      } else {
+        errorMessage = (error as any).message;
+      }
+
+      router.push({
+        pathname: "/verification-result",
+        params: { error: errorMessage },
+      });
+    } finally {
       setLoading(false);
-      setScanning(true); // Restart scanning on error
     }
+  };
+
+  const handleCancel = () => {
+    setShowModal(false);
+    setScanning(true);
   };
 
   return (
     <View style={styles.container}>
       {scanning ? (
-        <BarcodeScanner onBarCodeScanned={handleBarCodeScanned} />
+        <BarcodeScanner
+          onBarCodeScanned={handleBarCodeScanned}
+          isProcessing={loading}
+        />
       ) : (
         <View style={styles.placeholder}>
           {loading ? (
@@ -118,6 +111,39 @@ export default function ScanScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Verification Modal */}
+      <Modal
+        visible={showModal}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={handleCancel}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Barcode Scanned</Text>
+            <Text style={styles.modalText}>
+              Student ExamCard : {scannedData}
+            </Text>
+
+            <View style={styles.modalButtons}>
+              <TouchableOpacity
+                style={[styles.modalButton, styles.cancelButton]}
+                onPress={handleCancel}
+              >
+                <Text style={styles.modalButtonText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.modalButton, styles.verifyButton]}
+                onPress={handleVerify}
+              >
+                <Text style={styles.modalButtonText}>Verify</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -158,6 +184,50 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: "white",
+    fontWeight: "bold",
+    fontSize: 16,
+  },
+  // Add these new styles for the modal
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    borderRadius: 15,
+    padding: 20,
+    width: "80%",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  modalText: {
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  modalButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  modalButton: {
+    padding: 12,
+    borderRadius: 8,
+    width: "48%",
+    alignItems: "center",
+  },
+  cancelButton: {
+    backgroundColor: "#E0E0E0",
+  },
+  verifyButton: {
+    backgroundColor: "#6E3BFF",
+  },
+  modalButtonText: {
     fontWeight: "bold",
     fontSize: 16,
   },

@@ -51,169 +51,176 @@ export default function VerificationResult() {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header Section */}
-      <LinearGradient
-        colors={isSuccess ? ["#6E3BFF", "#8D5EF2"] : ["#F44336", "#FF5252"]}
-        style={styles.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
+    <View style={styles.container}>
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.avatar}>
-          {isSuccess ? (
-            <MaterialIcons name="check" size={40} color="white" />
-          ) : (
-            <MaterialIcons name="error" size={40} color="white" />
-          )}
-        </View>
-        <Text style={styles.studentName}>
-          {isSuccess ? "Verification Successful" : "Verification Failed"}
-        </Text>
-        {isSuccess && parsedStudent && (
-          <Text style={styles.headerId}>ID: {parsedStudent.studentId}</Text>
-        )}
-      </LinearGradient>
-
-      {/* Main Content */}
-      <View style={styles.content}>
-        {isSuccess && parsedStudent ? (
-          <>
-            {/* Basic Info Card */}
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <MaterialIcons name="info" size={20} color="#6E3BFF" />
-                <Text style={styles.cardTitle}>Student Information</Text>
-              </View>
-
-              <View style={styles.infoRow}>
-                <MaterialIcons name="person" size={18} color="#666" />
-                <Text style={styles.infoLabel}>Full Name:</Text>
-                <Text style={styles.infoValue}>{parsedStudent.fullName}</Text>
-              </View>
-
-              <View style={styles.infoRow}>
-                <MaterialIcons name="school" size={18} color="#666" />
-                <Text style={styles.infoLabel}>Faculty:</Text>
-                <Text style={styles.infoValue}>{parsedStudent.faculty}</Text>
-              </View>
-
-              <View style={styles.infoRow}>
-                <MaterialIcons name="class" size={18} color="#666" />
-                <Text style={styles.infoLabel}>Department:</Text>
-                <Text style={styles.infoValue}>{parsedStudent.department}</Text>
-              </View>
-
-              <View style={styles.infoRow}>
-                <MaterialIcons name="calendar-today" size={18} color="#666" />
-                <Text style={styles.infoLabel}>Academic Year:</Text>
-                <Text style={styles.infoValue}>
-                  {parsedStudent.academicYear}
-                </Text>
-              </View>
-
-              <View style={styles.infoRow}>
-                <MaterialIcons
-                  name={parsedStudent.isEligible ? "check-circle" : "cancel"}
-                  size={18}
-                  color={parsedStudent.isEligible ? "#4CAF50" : "#F44336"}
-                />
-                <Text style={styles.infoLabel}>Status:</Text>
-                <Text
-                  style={[
-                    styles.infoValue,
-                    parsedStudent.isEligible
-                      ? styles.eligible
-                      : styles.notEligible,
-                  ]}
-                >
-                  {parsedStudent.isEligible ? "Eligible" : "Not Eligible"}
-                </Text>
-              </View>
-            </View>
-
-            {/* Courses Card */}
-            <View style={styles.card}>
-              <View style={styles.cardHeader}>
-                <MaterialIcons name="menu-book" size={20} color="#6E3BFF" />
-                <Text style={styles.cardTitle}>Registered Courses</Text>
-                <Text style={styles.courseCount}>
-                  {parsedStudent.registeredCourses.length} courses
-                </Text>
-              </View>
-
-              {parsedStudent.registeredCourses.map((course: Course) => (
-                <View key={course.courseCode} style={styles.courseItem}>
-                  <View style={styles.courseCodeContainer}>
-                    <Text style={styles.courseCode}>{course.courseCode}</Text>
-                  </View>
-                  <View style={styles.courseDetails}>
-                    <Text style={styles.courseName}>{course.courseName}</Text>
-                    <View
-                      style={[
-                        styles.verificationBadge,
-                        course.isVerified
-                          ? styles.verified
-                          : styles.notVerified,
-                      ]}
-                    >
-                      <MaterialIcons
-                        name={course.isVerified ? "verified" : "schedule"}
-                        size={14}
-                        color={course.isVerified ? "#4CAF50" : "#FF9800"}
-                      />
-                      <Text style={styles.verificationText}>
-                        {course.isVerified ? "Verified" : "Pending"}
-                      </Text>
-                    </View>
-                  </View>
-                </View>
-              ))}
-            </View>
-          </>
-        ) : (
-          <View style={styles.errorCard}>
-            <Text style={styles.errorMessage}>{displayMessage}</Text>
-
-            {/* Only show manual verification option for "not found" errors */}
-            {(displayMessage.includes("not found") ||
-              displayMessage.includes("try using")) && (
-              <TouchableOpacity
-                style={styles.manualVerifyButton}
-                onPress={handleManualVerification}
-              >
-                <MaterialIcons name="search" size={20} color="white" />
-                <Text style={styles.manualVerifyButtonText}>
-                  Verify using Registration Number
-                </Text>
-              </TouchableOpacity>
-            )}
-
-            {/* Show different options for other errors */}
-            {displayMessage.includes("Network error") && (
-              <TouchableOpacity
-                style={styles.manualVerifyButton}
-                onPress={() => router.replace("/(tabs)/scan")}
-              >
-                <MaterialIcons name="refresh" size={20} color="white" />
-                <Text style={styles.manualVerifyButtonText}>Try Again</Text>
-              </TouchableOpacity>
+        {/* Header Section */}
+        <LinearGradient
+          colors={isSuccess ? ["#6E3BFF", "#8D5EF2"] : ["#F44336", "#FF5252"]}
+          style={styles.header}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <View style={styles.avatar}>
+            {isSuccess ? (
+              <MaterialIcons name="check" size={40} color="white" />
+            ) : (
+              <MaterialIcons name="error" size={40} color="white" />
             )}
           </View>
-        )}
+          <Text style={styles.studentName}>
+            {isSuccess ? "Verification Successful" : "Verification Failed"}
+          </Text>
+          {isSuccess && parsedStudent && (
+            <Text style={styles.headerId}>ID: {parsedStudent.studentId}</Text>
+          )}
+        </LinearGradient>
 
-        {/* Action Buttons */}
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={styles.secondaryButton}
-            onPress={() => router.replace("/(tabs)/scan")}
-          >
-            <Text style={styles.secondaryButtonText}>
-              {isSuccess ? "Scan Another" : "Scan Again"}
-            </Text>
-          </TouchableOpacity>
+        {/* Main Content */}
+        <View style={styles.content}>
+          {isSuccess && parsedStudent ? (
+            <>
+              {/* Basic Info Card */}
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <MaterialIcons name="info" size={20} color="#6E3BFF" />
+                  <Text style={styles.cardTitle}>Student Information</Text>
+                </View>
+
+                <View style={styles.infoRow}>
+                  <MaterialIcons name="person" size={18} color="#666" />
+                  <Text style={styles.infoLabel}>Full Name:</Text>
+                  <Text style={styles.infoValue}>{parsedStudent.fullName}</Text>
+                </View>
+
+                <View style={styles.infoRow}>
+                  <MaterialIcons name="school" size={18} color="#666" />
+                  <Text style={styles.infoLabel}>Faculty:</Text>
+                  <Text style={styles.infoValue}>{parsedStudent.faculty}</Text>
+                </View>
+
+                <View style={styles.infoRow}>
+                  <MaterialIcons name="class" size={18} color="#666" />
+                  <Text style={styles.infoLabel}>Department:</Text>
+                  <Text style={styles.infoValue}>
+                    {parsedStudent.department}
+                  </Text>
+                </View>
+
+                <View style={styles.infoRow}>
+                  <MaterialIcons name="calendar-today" size={18} color="#666" />
+                  <Text style={styles.infoLabel}>Academic Year:</Text>
+                  <Text style={styles.infoValue}>
+                    {parsedStudent.academicYear}
+                  </Text>
+                </View>
+
+                <View style={styles.infoRow}>
+                  <MaterialIcons
+                    name={parsedStudent.isEligible ? "check-circle" : "cancel"}
+                    size={18}
+                    color={parsedStudent.isEligible ? "#4CAF50" : "#F44336"}
+                  />
+                  <Text style={styles.infoLabel}>Status:</Text>
+                  <Text
+                    style={[
+                      styles.infoValue,
+                      parsedStudent.isEligible
+                        ? styles.eligible
+                        : styles.notEligible,
+                    ]}
+                  >
+                    {parsedStudent.isEligible ? "Eligible" : "Not Eligible"}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Courses Card */}
+              <View style={styles.card}>
+                <View style={styles.cardHeader}>
+                  <MaterialIcons name="menu-book" size={20} color="#6E3BFF" />
+                  <Text style={styles.cardTitle}>Registered Courses</Text>
+                  <Text style={styles.courseCount}>
+                    {parsedStudent.registeredCourses.length} courses
+                  </Text>
+                </View>
+
+                {parsedStudent.registeredCourses.map((course: Course) => (
+                  <View key={course.courseCode} style={styles.courseItem}>
+                    <View style={styles.courseCodeContainer}>
+                      <Text style={styles.courseCode}>{course.courseCode}</Text>
+                    </View>
+                    <View style={styles.courseDetails}>
+                      <Text style={styles.courseName}>{course.courseName}</Text>
+                      <View
+                        style={[
+                          styles.verificationBadge,
+                          course.isVerified
+                            ? styles.verified
+                            : styles.notVerified,
+                        ]}
+                      >
+                        <MaterialIcons
+                          name={course.isVerified ? "verified" : "schedule"}
+                          size={14}
+                          color={course.isVerified ? "#4CAF50" : "#FF9800"}
+                        />
+                        <Text style={styles.verificationText}>
+                          {course.isVerified ? "Verified" : "Pending"}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </>
+          ) : (
+            <View style={styles.errorCard}>
+              <Text style={styles.errorMessage}>{displayMessage}</Text>
+
+              {/* Only show manual verification option for "not found" errors */}
+              {(displayMessage.includes("not found") ||
+                displayMessage.includes("try using")) && (
+                <TouchableOpacity
+                  style={styles.manualVerifyButton}
+                  onPress={handleManualVerification}
+                >
+                  <MaterialIcons name="search" size={20} color="white" />
+                  <Text style={styles.manualVerifyButtonText}>
+                    Verify using Registration Number
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Show different options for other errors */}
+              {displayMessage.includes("Network error") && (
+                <TouchableOpacity
+                  style={styles.manualVerifyButton}
+                  onPress={() => router.replace("/(tabs)/scan")}
+                >
+                  <MaterialIcons name="refresh" size={20} color="white" />
+                  <Text style={styles.manualVerifyButtonText}>Try Again</Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          )}
         </View>
+      </ScrollView>
+      {/* Floating Action Button */}
+      <View style={styles.floatingButtonContainer}>
+        <TouchableOpacity
+          style={styles.floatingButton}
+          onPress={() => router.replace("/(tabs)/scan")}
+        >
+          <MaterialIcons name="qr-code-scanner" size={24} color="white" />
+          <Text style={styles.floatingButtonText}>
+            {isSuccess ? "Scan Another Student" : "Scan Again"}
+          </Text>
+        </TouchableOpacity>
       </View>
-    </ScrollView>
+    </View>
   );
 }
 
@@ -221,6 +228,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#F8F9FF",
+    position: "relative", // Needed for absolute positioning of floating button
+  },
+  scrollView: {
+    flex: 1,
+  },
+  floatingButtonContainer: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    left: 20,
+    elevation: 5,
+    backgroundColor: "transparent",
+    marginBottom: 30,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+  },
+  floatingButton: {
+    backgroundColor: "#6E3BFF",
+    borderRadius: 30,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  floatingButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    marginLeft: 8,
+    fontSize: 16,
   },
   header: {
     padding: 24,

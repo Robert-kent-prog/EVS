@@ -1,8 +1,4 @@
-import {
-  FontAwesome5,
-  MaterialCommunityIcons,
-  MaterialIcons,
-} from "@expo/vector-icons";
+import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 import { useAuth } from "../context/AuthContext";
 
@@ -42,7 +38,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="history"
         options={{
           title: "History",
@@ -50,7 +46,7 @@ export default function TabLayout() {
             <MaterialCommunityIcons name="history" size={24} color={color} />
           ),
         }}
-      />
+      /> */}
     </Tabs>
   );
 }

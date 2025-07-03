@@ -3,7 +3,6 @@ import { CameraView, useCameraPermissions } from "expo-camera";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -12,15 +11,16 @@ import {
 
 interface BarcodeScannerProps {
   onBarCodeScanned: (data: { data: string }) => void;
+  isProcessing: boolean;
 }
 
 const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   onBarCodeScanned,
+  isProcessing,
 }) => {
   const [facing, setFacing] = useState<"front" | "back">("back");
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
 
   if (!permission) {
     return (
@@ -49,40 +49,9 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   }
 
   const handleScan = ({ data }: { data: string }) => {
-    if (!scanned) {
+    if (!scanned && !isProcessing) {
       setScanned(true);
-      setIsProcessing(true);
-
-      Alert.alert(
-        "Barcode Scanned",
-        `Data: ${data}`,
-        [
-          {
-            text: "Cancel",
-            onPress: () => {
-              setScanned(false);
-              setIsProcessing(false);
-            },
-            style: "cancel",
-          },
-          {
-            text: "Verify",
-            onPress: () => {
-              onBarCodeScanned?.({ data });
-              setTimeout(() => setScanned(false), 3000);
-            },
-          },
-        ],
-        { cancelable: false }
-      );
-
-      setTimeout(() => {
-        if (isProcessing) {
-          onBarCodeScanned?.({ data });
-          setIsProcessing(false);
-          setTimeout(() => setScanned(false), 3000);
-        }
-      }, 5000);
+      onBarCodeScanned?.({ data });
     }
   };
 
@@ -114,10 +83,9 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
               "qr",
             ],
           }}
-          onBarcodeScanned={scanned ? undefined : handleScan}
+          onBarcodeScanned={scanned || isProcessing ? undefined : handleScan}
         />
 
-        {/* Overlay elements moved outside CameraView */}
         <View style={styles.overlay}>
           <View style={styles.scanArea}>
             {isProcessing && (
@@ -140,7 +108,6 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
           <Text style={styles.flipButtonText}>Flip Camera</Text>
         </TouchableOpacity>
       </View>
-
       <View style={styles.instructions}>
         <Text style={styles.instructionsTitle}>Scanning Instructions:</Text>
         <View style={styles.instructionItem}>
