@@ -44,9 +44,13 @@ export default function LoginScreen() {
     } catch (error) {
       let errorMessage = "An unknown error occurred";
       if (error instanceof Error) {
-        errorMessage = error.message;
-      } else if (typeof error === "string") {
-        errorMessage = error;
+        if (error.message.includes("status code 500")) {
+          errorMessage = "Server error. Please try again later.";
+        } else if (error.message.includes("validation failed")) {
+          errorMessage = "Invalid login credentials.";
+        } else {
+          errorMessage = error.message;
+        }
       }
 
       setError(errorMessage);

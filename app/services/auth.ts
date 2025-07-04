@@ -9,7 +9,6 @@ interface LoginResponse {
     _id: string;
     userName: string;
     staffNo: string;
-    email: string,
     role: string;
   };
 }
@@ -26,27 +25,34 @@ interface RegisterResponse {
 }
 
 export const register = async (
-userName: string, staffNo: string, password: string, email: string, role: string): Promise<RegisterResponse['user']> => { // Only return the user part
+  userName: string, 
+  staffNo: string, 
+  email: string, 
+  password: string, 
+  role: string = "Invigilator" // Make role optional with default
+): Promise<RegisterResponse['user']> => {
   try {
     const response = await axios.post(`${API_URL}/users`, {
       userName,
       staffNo,
-      password,
       email,
+      password,
       role
     });
-
-    console.log('Full registration response:', response.data); // Debug log
 
     if (!response.data.user?._id) {
       throw new Error('Registration failed - invalid response format');
     }
 
-    return response.data.user; // Return only the user object
+    return response.data.user;
   } catch (error) {
     console.error('Registration error details:', error);
     if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message || 'Registration failed');
+      throw new Error(
+        error.response?.data?.message || 
+        error.response?.data?.error || 
+        'Registration failed'
+      );
     }
     throw error;
   }
@@ -72,7 +78,6 @@ export const login = async (
         _id: response.data.user._id,
         userName: response.data.user.userName,
         staffNo: response.data.user.staffNo,
-        email: response.data.user.email,
         role: response.data.user.role
       }
     };
