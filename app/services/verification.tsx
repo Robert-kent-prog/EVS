@@ -7,6 +7,7 @@ interface VerificationResponse {
   fullName: string;
   academicYear: string;
   faculty: string;
+  yearofStudy: string;
   department: string;
   registeredCourses: {
     courseCode: string;

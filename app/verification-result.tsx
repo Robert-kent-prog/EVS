@@ -118,6 +118,14 @@ export default function VerificationResult() {
                 </View>
 
                 <View style={styles.infoRow}>
+                  <MaterialIcons name="school" size={18} color="#666" />
+                  <Text style={styles.infoLabel}>Year Of Study:</Text>
+                  <Text style={styles.infoValue}>
+                    {parsedStudent.yearOfStudy}
+                  </Text>
+                </View>
+
+                <View style={styles.infoRow}>
                   <MaterialIcons
                     name={parsedStudent.isEligible ? "check-circle" : "cancel"}
                     size={18}
