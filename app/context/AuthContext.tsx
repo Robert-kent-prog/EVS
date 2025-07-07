@@ -7,6 +7,7 @@ interface User {
   staffNo: string;
   role: "Invigilator";
   token: string;
+  email: string; // Changed from optional to required
 }
 
 interface AuthContextType {
@@ -34,14 +35,30 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const loadAuthState = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
-        const userData = await AsyncStorage.getItem("userData");
+        const userDataString = await AsyncStorage.getItem("userData");
 
-        if (token && userData) {
-          const isValid = await verifyToken(token);
-          if (isValid) {
-            setUser({ ...JSON.parse(userData), token });
-          } else {
-            await logout();
+        if (token && userDataString) {
+          const userData = JSON.parse(userDataString);
+          // Ensure all required fields exist
+          if (
+            userData.userId &&
+            userData.userName &&
+            userData.staffNo &&
+            userData.role
+          ) {
+            const isValid = await verifyToken(token);
+            if (isValid) {
+              setUser({
+                userId: userData.userId,
+                userName: userData.userName,
+                staffNo: userData.staffNo,
+                role: userData.role,
+                email: userData.email || "", // Provide fallback if email is missing
+                token,
+              });
+            } else {
+              await logout();
+            }
           }
         }
       } catch (error) {
@@ -62,7 +79,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     try {
       const response = await fetch(
-        "http://192.168.100.25:6000/api/verify-token",
+        "http://192.168.0.108:6000/api/verify-token",
         {
           method: "POST",
           headers: {
@@ -78,19 +95,29 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Login function
+  // Updated login function
   const login = async (token: string, userData: Omit<User, "token">) => {
+    // console.log("Login data received:", { token, userData }); // Add this line
     try {
+      // Ensure all required fields are present
+      const completeUserData = {
+        userId: userData.userId,
+        userName: userData.userName,
+        staffNo: userData.staffNo,
+        role: userData.role,
+        email: userData.email || "", // Handle potential missing email
+      };
+
       await AsyncStorage.setItem("authToken", token);
-      await AsyncStorage.setItem("userData", JSON.stringify(userData));
-      setUser({ ...userData, token });
+      await AsyncStorage.setItem("userData", JSON.stringify(completeUserData));
+      setUser({ ...completeUserData, token });
     } catch (error) {
       console.error("Login error:", error);
       throw error;
     }
   };
 
-  // Logout function
+  // Logout function remains the same
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("authToken");

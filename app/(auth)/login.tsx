@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert } from "react-native";
@@ -20,6 +21,9 @@ export default function LoginScreen() {
     setLoading(true);
     setError(null);
 
+    // const response = await login(staffNo, password);
+    // console.log("Service response:", response); // Debug log
+
     try {
       const { token, user } = await login(staffNo, password);
 
@@ -38,6 +42,7 @@ export default function LoginScreen() {
         userName: user.userName,
         staffNo: user.staffNo,
         role: "Invigilator", // Hardcoded value
+        email: user.email || "", // Ensure email is always present
       });
 
       router.replace("/(tabs)/home");

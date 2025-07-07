@@ -31,6 +31,7 @@ export default function RegisterScreen() {
           userName: user.userName,
           staffNo: user.staffNo,
           role: "Invigilator", // Hardcoded to ensure type safety
+          email: user.email || "", // Ensure email is always present
         });
 
         router.replace("/(tabs)/home");

@@ -4,6 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import VerificationCard from "../components/VerificationCard";
 import { useAuth } from "../context/AuthContext";
+import ProfileMenu from "../profile/ProfileMenu";
 
 export default function HomeScreen() {
   const { user, logout } = useAuth();
@@ -23,7 +24,7 @@ export default function HomeScreen() {
             <Text style={styles.userRole}>{user?.role}</Text>
           </View>
           <View style={styles.avatar}>
-            <MaterialIcons name="account-circle" size={60} color="#6E3BFF" />
+            <ProfileMenu />
           </View>
         </View>
 

@@ -1,7 +1,8 @@
 /* eslint-disable import/no-named-as-default-member */
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.100.25:6000/api';
+const API_URL = 'http://192.168.0.108:6000/api';
 
 interface LoginResponse {
   token: string;
@@ -10,6 +11,7 @@ interface LoginResponse {
     userName: string;
     staffNo: string;
     role: string;
+    email: string; 
   };
 }
 
@@ -68,25 +70,25 @@ export const login = async (
       password
     });
 
+    // console.log("Full API response:", response.data); // Debug log
+
     if (!response.data.accessToken || !response.data.user?._id) {
       throw new Error('Login failed - invalid response format');
     }
 
     return {
-      token: response.data.accessToken,  // Now matches backend property name
+      token: response.data.accessToken,
       user: {
         _id: response.data.user._id,
         userName: response.data.user.userName,
         staffNo: response.data.user.staffNo,
-        role: response.data.user.role
+        role: response.data.user.role,
+        email: response.data.user.email // Make sure this is included
       }
     };
   } catch (error) {
     console.error('Login error:', error);
-    if (axios.isAxiosError(error)) {
-      throw new Error(error.response?.data?.message || 'Login failed');
-    }
-    throw new Error('Login failed');
+    throw error;
   }
 };
 
@@ -107,4 +109,33 @@ export const forgotPassword = async (staffNo: string) => {
     staffNo,
   });
   return response.data;
+};
+
+// Add these to your auth service
+export const updateProfile = async (userId: string, data: {
+  userName: string;
+  email: string;
+  staffNo: string;
+}) => {
+  try {
+    const response = await axios.put(`${API_URL}/users/${userId}`, data, {
+      headers: { Authorization: `Bearer ${await AsyncStorage.getItem("authToken")}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Update profile error:", error);
+    throw error;
+  }
+};
+
+export const deleteAccount = async (userId: string) => {
+  try {
+    const response = await axios.delete(`${API_URL}/users/${userId}`, {
+      headers: { Authorization: `Bearer ${await AsyncStorage.getItem("authToken")}` },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Delete account error:", error);
+    throw error;
+  }
 };
