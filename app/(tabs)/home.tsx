@@ -39,14 +39,14 @@ export default function HomeScreen() {
             route="./scan"
             colors={["#6E3BFF", "#8D5EF2"]}
           />
-
+          {/* 
           <VerificationCard
             title="Verification History"
             description="View your recent verification activities"
             icon="history"
             route="./history"
             colors={["#4CAF50", "#66BB6A"]}
-          />
+          /> */}
 
           {/* Stats Section */}
           <View style={styles.statsContainer}>
