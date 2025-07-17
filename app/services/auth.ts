@@ -2,7 +2,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 
-const API_URL = 'http://192.168.100.25:6000/api';
+const API_URL = 'http://192.168.0.108:6000/api';
 
 interface LoginResponse {
   token: string;
