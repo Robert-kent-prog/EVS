@@ -149,9 +149,9 @@ export default function VerificationResult() {
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
                   <MaterialIcons name="menu-book" size={20} color="#6E3BFF" />
-                  <Text style={styles.cardTitle}>Registered Courses</Text>
+                  <Text style={styles.cardTitle}>Registered Units</Text>
                   <Text style={styles.courseCount}>
-                    {parsedStudent.registeredCourses.length} courses
+                    {parsedStudent.registeredCourses.length} Units
                   </Text>
                 </View>
 

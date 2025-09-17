@@ -101,7 +101,7 @@ export default function AuthForm({
 
   return (
     <ImageBackground
-      source={require("../../assets/images/header_Image.png")}
+      source={require("../../assets/seku.png")}
       style={styles.backgroundImage}
       resizeMode="cover"
     >
