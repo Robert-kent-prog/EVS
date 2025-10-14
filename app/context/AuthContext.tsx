@@ -78,13 +78,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!tokenToVerify) return false;
 
     try {
-      const response = await fetch("http://10.6.81.43:6000/api/verify-token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${tokenToVerify}`,
-        },
-      });
+      const response = await fetch(
+        "http://10.6.114.106:6000/api/verify-token",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenToVerify}`,
+          },
+        }
+      );
       return response.ok;
     } catch (error) {
       console.error("Token verification error:", error);
