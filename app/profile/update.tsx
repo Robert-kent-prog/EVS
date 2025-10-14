@@ -1,6 +1,6 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { LinearGradient } from "expo-linear-gradient";
-import { router } from "expo-router"; // Import Expo Router
+import { router } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
@@ -15,7 +15,7 @@ import { useAuth } from "../context/AuthContext";
 import { updateProfile } from "../services/auth";
 
 export default function UpdateProfileScreen() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth(); // Get updateUser from context
   const [formData, setFormData] = useState({
     userName: user?.userName || "",
     email: user?.email || "",
@@ -33,6 +33,14 @@ export default function UpdateProfileScreen() {
     setLoading(true);
     try {
       await updateProfile(user?.userId || "", formData);
+
+      // Update the user context with new data
+      await updateUser({
+        userName: formData.userName,
+        email: formData.email,
+        staffNo: formData.staffNo,
+      });
+
       Alert.alert("Success", "Profile updated successfully");
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
@@ -50,7 +58,6 @@ export default function UpdateProfileScreen() {
       {/* Back Button */}
       <Pressable style={styles.backButton} onPress={() => router.back()}>
         <AntDesign name="arrowleft" size={28} color="" />
-        {/* <Text style={styles.backButtonText}>Back</Text> */}
       </Pressable>
 
       <View style={styles.container}>
@@ -110,7 +117,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 25,
-    paddingTop: 60, // Increased to accommodate back button
+    paddingTop: 60,
   },
   backButton: {
     position: "absolute",
