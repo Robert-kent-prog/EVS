@@ -43,6 +43,7 @@ export default function ScanScreen() {
     } catch (error) {
       let errorMessage = "An unknown error occurred";
 
+      // eslint-disable-next-line import/no-named-as-default-member
       if (axios.isAxiosError(error)) {
         if (error.response) {
           errorMessage = error.response.data.error || "Student not found";

@@ -7,7 +7,7 @@ interface User {
   staffNo: string;
   role: "Invigilator";
   token: string;
-  email: string; // Changed from optional to required
+  email: string;
 }
 
 interface AuthContextType {
@@ -16,6 +16,7 @@ interface AuthContextType {
   login: (token: string, userData: Omit<User, "token">) => Promise<void>;
   logout: () => Promise<void>;
   verifyToken: () => Promise<boolean>;
+  updateUser: (userData: Partial<User>) => Promise<void>; // Add this line
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -24,11 +25,32 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: async () => {},
   verifyToken: async () => false,
+  updateUser: async () => {}, // Add this line
 });
 
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Add the updateUser function
+  const updateUser = async (userData: Partial<User>) => {
+    if (!user) return;
+
+    try {
+      const updatedUser = { ...user, ...userData };
+      setUser(updatedUser);
+
+      // Also update AsyncStorage to persist the changes
+      const { token, ...userDataWithoutToken } = updatedUser;
+      await AsyncStorage.setItem(
+        "userData",
+        JSON.stringify(userDataWithoutToken)
+      );
+    } catch (error) {
+      console.error("Update user error:", error);
+      throw error;
+    }
+  };
 
   // Initialize auth state
   useEffect(() => {
@@ -39,7 +61,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (token && userDataString) {
           const userData = JSON.parse(userDataString);
-          // Ensure all required fields exist
           if (
             userData.userId &&
             userData.userName &&
@@ -53,7 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 userName: userData.userName,
                 staffNo: userData.staffNo,
                 role: userData.role,
-                email: userData.email || "", // Provide fallback if email is missing
+                email: userData.email || "",
                 token,
               });
             } else {
@@ -95,17 +116,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Updated login function
+  // Login function
   const login = async (token: string, userData: Omit<User, "token">) => {
-    // console.log("Login data received:", { token, userData }); // Add this line
     try {
-      // Ensure all required fields are present
       const completeUserData = {
         userId: userData.userId,
         userName: userData.userName,
         staffNo: userData.staffNo,
         role: userData.role,
-        email: userData.email || "", // Handle potential missing email
+        email: userData.email || "",
       };
 
       await AsyncStorage.setItem("authToken", token);
@@ -117,7 +136,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Logout function remains the same
+  // Logout function
   const logout = async () => {
     try {
       await AsyncStorage.removeItem("authToken");
@@ -129,7 +148,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, verifyToken }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+        verifyToken,
+        updateUser, // Add this to the provider
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
