@@ -100,7 +100,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     try {
       const response = await fetch(
-        "http://10.6.114.106:6000/api/verify-token",
+        "http://10.134.223.8:6000/api/verify-token",
         {
           method: "POST",
           headers: {

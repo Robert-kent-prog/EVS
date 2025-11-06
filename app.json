@@ -45,7 +45,8 @@
           "photosPermission": "Allow EVS to access your photos.",
           "cameraPermission": "Allow EVS to access your camera."
         }
-      ]
+      ],
+      "expo-secure-store"
     ],
     "experiments": {
       "typedRoutes": true
