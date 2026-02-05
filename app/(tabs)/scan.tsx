@@ -1,17 +1,25 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Modal,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import BarcodeScanner from "../components/BarcodeScanner";
 import { useAuth } from "../context/AuthContext";
+import {
+  clearStoredUnit,
+  getStoredUnit,
+  setStoredUnit,
+  Unit,
+} from "../services/unit"; // Import unit services
 import { verifyByExamCard } from "../services/verification";
 
 export default function ScanScreen() {
@@ -19,8 +27,26 @@ export default function ScanScreen() {
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [scannedData, setScannedData] = useState("");
+  const [unitCode, setUnitCode] = useState("");
+  const [unitName, setUnitName] = useState("");
+  const [currentUnit, setCurrentUnit] = useState<Unit | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const { user } = useAuth();
   const router = useRouter();
+
+  // Load stored unit on component mount
+  useEffect(() => {
+    loadStoredUnit();
+  }, []);
+
+  const loadStoredUnit = async () => {
+    const storedUnit = await getStoredUnit();
+    if (storedUnit) {
+      setCurrentUnit(storedUnit);
+      setUnitCode(storedUnit.code);
+      setUnitName(storedUnit.name);
+    }
+  };
 
   const handleBarCodeScanned = async ({ data }: { data: string }) => {
     if (loading || !scanning) return;
@@ -30,20 +56,56 @@ export default function ScanScreen() {
     setScanning(false);
   };
 
+  const handleUpdateUnit = async () => {
+    if (!unitCode.trim() || !unitName.trim()) {
+      Alert.alert("Error", "Please enter both unit code and unit name");
+      return;
+    }
+
+    const newUnit: Unit = {
+      code: unitCode.trim(),
+      name: unitName.trim(),
+    };
+
+    await setStoredUnit(newUnit);
+    setCurrentUnit(newUnit);
+    setIsEditing(false);
+    Alert.alert("Success", "Unit details updated successfully");
+  };
+
+  const handleClearUnit = async () => {
+    await clearStoredUnit();
+    setCurrentUnit(null);
+    setUnitCode("");
+    setUnitName("");
+    setIsEditing(false);
+    Alert.alert("Cleared", "Unit details have been cleared");
+  };
+
   const handleVerify = async () => {
     setLoading(true);
     setShowModal(false);
 
     try {
-      const result = await verifyByExamCard(scannedData, user?.token || "");
+      // Pass the current unit code to the verification service
+      const result = await verifyByExamCard(
+        scannedData,
+        user?.token || "",
+        currentUnit?.code, // Pass unit code if set
+      );
+
+      // Pass both student result and unit details to verification result page
       router.push({
         pathname: "/verification-result",
-        params: { student: JSON.stringify(result) },
+        params: {
+          student: JSON.stringify(result),
+          unitCode: currentUnit?.code || "",
+          unitName: currentUnit?.name || "",
+        },
       });
     } catch (error) {
       let errorMessage = "An unknown error occurred";
 
-      // eslint-disable-next-line import/no-named-as-default-member
       if (axios.isAxiosError(error)) {
         if (error.response) {
           errorMessage = error.response.data.error || "Student not found";
@@ -59,7 +121,11 @@ export default function ScanScreen() {
 
       router.push({
         pathname: "/verification-result",
-        params: { error: errorMessage },
+        params: {
+          error: errorMessage,
+          unitCode: currentUnit?.code || "",
+          unitName: currentUnit?.name || "",
+        },
       });
     } finally {
       setLoading(false);
@@ -71,8 +137,120 @@ export default function ScanScreen() {
     setScanning(true);
   };
 
+  const toggleEdit = () => {
+    if (currentUnit && !isEditing) {
+      setUnitCode(currentUnit.code);
+      setUnitName(currentUnit.name);
+    }
+    setIsEditing(!isEditing);
+  };
+
+  // Function to handle start scanning
+  const handleStartScanning = () => {
+    if (!currentUnit) {
+      Alert.alert(
+        "Unit Not Set",
+        "Please set a unit before starting to scan. Use the 'Edit' button to add unit details.",
+        [{ text: "OK" }],
+      );
+      return;
+    }
+    setScanning(true);
+  };
+
+  // Determine if start scanning should be disabled
+  const isStartScanningDisabled = !currentUnit || loading;
+
   return (
     <View style={styles.container}>
+      {/* Unit Section */}
+      <View style={styles.unitSection}>
+        <View style={styles.unitHeader}>
+          <Text style={styles.unitTitle}>Unit Details</Text>
+          <TouchableOpacity onPress={toggleEdit}>
+            <MaterialIcons
+              name={isEditing ? "cancel" : "edit"}
+              size={24}
+              color="#0066cc"
+            />
+          </TouchableOpacity>
+        </View>
+
+        {isEditing ? (
+          <>
+            <View style={styles.inputRow}>
+              <MaterialIcons name="code" size={20} color="#666" />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter unit code (e.g., CS101)"
+                value={unitCode}
+                onChangeText={setUnitCode}
+                editable={isEditing}
+              />
+            </View>
+            <View style={styles.inputRow}>
+              <MaterialIcons name="book" size={20} color="#666" />
+              <TextInput
+                style={styles.input}
+                placeholder="Enter unit name"
+                value={unitName}
+                onChangeText={setUnitName}
+                editable={isEditing}
+              />
+            </View>
+
+            <View style={styles.unitButtons}>
+              <TouchableOpacity
+                style={[styles.unitButton, styles.updateButton]}
+                onPress={handleUpdateUnit}
+              >
+                <MaterialIcons name="save" size={20} color="white" />
+                <Text style={styles.unitButtonText}>Update Unit</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={[styles.unitButton, styles.clearButton]}
+                onPress={handleClearUnit}
+              >
+                <MaterialIcons name="clear" size={20} color="white" />
+                <Text style={styles.unitButtonText}>Clear Unit</Text>
+              </TouchableOpacity>
+            </View>
+          </>
+        ) : (
+          <View style={styles.unitInfo}>
+            <View style={styles.unitInfoRow}>
+              <MaterialIcons name="code" size={20} color="#666" />
+              <Text style={styles.unitInfoLabel}>Unit Code:</Text>
+              <Text style={styles.unitInfoValue}>
+                {currentUnit?.code || "Not set"}
+              </Text>
+            </View>
+            <View style={styles.unitInfoRow}>
+              <MaterialIcons name="book" size={20} color="#666" />
+              <Text style={styles.unitInfoLabel}>Unit Name:</Text>
+              <Text style={styles.unitInfoValue}>
+                {currentUnit?.name || "Not set"}
+              </Text>
+            </View>
+            {currentUnit ? (
+              <Text style={styles.unitNote}>
+                Currently selected unit. Students will be verified against this
+                unit.
+              </Text>
+            ) : (
+              <View style={styles.unitWarning}>
+                <MaterialIcons name="warning" size={16} color="#ff9900" />
+                <Text style={styles.unitWarningText}>
+                  Please set a unit before scanning
+                </Text>
+              </View>
+            )}
+          </View>
+        )}
+      </View>
+
+      {/* Scanner Section */}
       {scanning ? (
         <BarcodeScanner
           onBarCodeScanned={handleBarCodeScanned}
@@ -91,8 +269,29 @@ export default function ScanScreen() {
                 style={styles.icon}
               />
               <Text style={styles.placeholderText}>
-                Press Start Scanning Button to begin
+                {currentUnit
+                  ? "Press Start Scanning Button to begin"
+                  : "Set unit details to enable scanning"}
               </Text>
+              {currentUnit ? (
+                <View style={styles.currentUnitBanner}>
+                  <MaterialIcons name="info" size={16} color="#0066cc" />
+                  <Text style={styles.currentUnitText}>
+                    Scanning for: {currentUnit.code} - {currentUnit.name}
+                  </Text>
+                </View>
+              ) : (
+                <View style={styles.noUnitWarning}>
+                  <MaterialIcons
+                    name="error-outline"
+                    size={20}
+                    color="#cc3300"
+                  />
+                  <Text style={styles.noUnitWarningText}>
+                    No unit selected. Scanning disabled.
+                  </Text>
+                </View>
+              )}
             </>
           )}
         </View>
@@ -103,13 +302,22 @@ export default function ScanScreen() {
           style={[
             styles.button,
             scanning ? styles.stopButton : styles.startButton,
+            isStartScanningDisabled && styles.disabledButton,
           ]}
-          onPress={() => setScanning(!scanning)}
-          disabled={loading}
+          onPress={scanning ? () => setScanning(false) : handleStartScanning}
+          disabled={isStartScanningDisabled}
         >
           <Text style={styles.buttonText}>
             {scanning ? "Stop Scanning" : "Start Scanning"}
           </Text>
+          {isStartScanningDisabled && !loading && (
+            <MaterialIcons
+              name="lock"
+              size={16}
+              color="rgba(255,255,255,0.8)"
+              style={styles.lockIcon}
+            />
+          )}
         </TouchableOpacity>
       </View>
 
@@ -126,6 +334,15 @@ export default function ScanScreen() {
             <Text style={styles.modalText}>
               Student ExamCard : {scannedData}
             </Text>
+
+            {currentUnit && (
+              <View style={styles.unitBadge}>
+                <MaterialIcons name="class" size={16} color="#0066cc" />
+                <Text style={styles.unitBadgeText}>
+                  Unit: {currentUnit.code}
+                </Text>
+              </View>
+            )}
 
             <View style={styles.modalButtons}>
               <TouchableOpacity
@@ -153,6 +370,111 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  unitSection: {
+    backgroundColor: "white",
+    padding: 15,
+    marginHorizontal: 20,
+    marginTop: 20,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  unitHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 15,
+  },
+  unitTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+  },
+  inputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+  },
+  input: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    fontSize: 16,
+  },
+  unitButtons: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+  },
+  unitButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 10,
+    borderRadius: 8,
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  updateButton: {
+    backgroundColor: "#0066cc",
+  },
+  clearButton: {
+    backgroundColor: "#cc3300",
+  },
+  unitButtonText: {
+    color: "white",
+    fontWeight: "bold",
+    marginLeft: 5,
+  },
+  unitInfo: {
+    paddingVertical: 5,
+  },
+  unitInfoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  unitInfoLabel: {
+    fontWeight: "600",
+    marginLeft: 8,
+    marginRight: 10,
+    color: "#555",
+    width: 80,
+  },
+  unitInfoValue: {
+    flex: 1,
+    color: "#333",
+    fontSize: 16,
+  },
+  unitNote: {
+    fontSize: 12,
+    color: "#666",
+    fontStyle: "italic",
+    marginTop: 10,
+    padding: 8,
+    backgroundColor: "#f0f8ff",
+    borderRadius: 5,
+  },
+  unitWarning: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+    padding: 8,
+    backgroundColor: "#fff8e1",
+    borderRadius: 5,
+  },
+  unitWarningText: {
+    fontSize: 12,
+    color: "#ff9900",
+    marginLeft: 5,
+  },
   placeholder: {
     flex: 1,
     justifyContent: "center",
@@ -167,6 +489,33 @@ const styles = StyleSheet.create({
     color: "#666",
     textAlign: "center",
     paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+  currentUnitBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#e6f2ff",
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  currentUnitText: {
+    color: "#0066cc",
+    marginLeft: 8,
+    fontWeight: "500",
+  },
+  noUnitWarning: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#ffebee",
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  noUnitWarningText: {
+    color: "#cc3300",
+    marginLeft: 8,
+    fontWeight: "500",
   },
   controls: {
     padding: 20,
@@ -176,6 +525,8 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 5,
     alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
   },
   startButton: {
     backgroundColor: "#0066cc",
@@ -183,12 +534,17 @@ const styles = StyleSheet.create({
   stopButton: {
     backgroundColor: "#cc3300",
   },
+  disabledButton: {
+    backgroundColor: "#cccccc",
+  },
   buttonText: {
     color: "white",
     fontWeight: "bold",
     fontSize: 16,
   },
-  // Add these new styles for the modal
+  lockIcon: {
+    marginLeft: 8,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: "center",
@@ -209,8 +565,22 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontSize: 16,
-    marginBottom: 20,
+    marginBottom: 10,
     textAlign: "center",
+  },
+  unitBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#e6f2ff",
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 20,
+  },
+  unitBadgeText: {
+    color: "#0066cc",
+    fontWeight: "500",
+    marginLeft: 5,
   },
   modalButtons: {
     flexDirection: "row",

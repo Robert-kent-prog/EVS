@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "http://10.134.223.8:6000/api/student";
+const API_URL = "http://10.170.227.8:6000/api/student";
 
 interface VerificationResponse {
   studentId: string;
@@ -19,24 +19,32 @@ interface VerificationResponse {
 
 export const verifyByExamCard = async (
   examCardNo: string,
-  token: string
+  token: string,
+  unitCode?: string, // Add optional unit code parameter
 ): Promise<VerificationResponse> => {
   const response = await axios.post(
     `${API_URL}/verify`,
-    { examCardNo },
-    { headers: { Authorization: `Bearer ${token}` } }
+    {
+      examCardNo,
+      unitCode, // Include unit code in request body
+    },
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 };
 
 export const verifyByStudentId = async (
   studentId: string,
-  token: string
+  token: string,
+  unitCode?: string, // Add optional unit code parameter
 ): Promise<VerificationResponse> => {
   const response = await axios.post(
     `${API_URL}/verify`,
-    { studentId },
-    { headers: { Authorization: `Bearer ${token}` } }
+    {
+      studentId,
+      unitCode, // Include unit code in request body
+    },
+    { headers: { Authorization: `Bearer ${token}` } },
   );
   return response.data;
 };

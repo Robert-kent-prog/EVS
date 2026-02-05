@@ -39,6 +39,13 @@ export default function HomeScreen() {
             route="./scan"
             colors={["#6E3BFF", "#8D5EF2"]}
           />
+          <VerificationCard
+            title="Reports Generation"
+            description="View attendance reports and statistics"
+            icon="qrcode"
+            route="../reports"
+            colors={["#6E3BFF", "#8D5EF2"]}
+          />
           {/* 
           <VerificationCard
             title="Verification History"

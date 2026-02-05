@@ -1,6 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -8,6 +9,25 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+// Add to your existing imports
+import { storeAttendanceRecord } from "./services/database";
+
+// Define your student interface based on your API response
+interface Student {
+  studentId: string;
+  fullName: string;
+  academicYear: string;
+  faculty: string;
+  yearOfStudy: string;
+  department: string;
+  registeredCourses: {
+    courseCode: string;
+    courseName: string;
+    isVerified: boolean;
+  }[];
+  isEligible: boolean;
+  examCardNo?: string; // Optional field
+}
 
 interface Course {
   courseCode: string;
@@ -16,35 +36,83 @@ interface Course {
 }
 
 export default function VerificationResult() {
-  const { student, error } = useLocalSearchParams();
+  const { student, error, unitCode, unitName } = useLocalSearchParams();
   const router = useRouter();
-  let parsedStudent = null;
-  let isSuccess = false;
-  let displayMessage = "";
+  const [filteredCourses, setFilteredCourses] = useState<Course[]>([]);
+  const [parsedStudent, setParsedStudent] = useState<Student | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [displayMessage, setDisplayMessage] = useState("");
 
-  if (typeof student === "string") {
-    try {
-      parsedStudent = JSON.parse(student);
-      isSuccess = !!parsedStudent;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (e) {
-      isSuccess = false;
-    }
-  }
+  // Parse student data and filter courses
+  useEffect(() => {
+    if (typeof student === "string") {
+      try {
+        const studentData = JSON.parse(student) as Student;
+        setParsedStudent(studentData);
+        setIsSuccess(true);
 
-  // Only set error message if there's actually an error
-  if (!isSuccess && typeof error === "string") {
-    if (error.includes("404")) {
-      displayMessage =
-        "Student not found. Please try using the Registration Number instead.";
-    } else if (error.includes("500")) {
-      displayMessage = "Server error. Please try again later.";
-    } else if (error.includes("No response")) {
-      displayMessage = "Network error. Please check your connection.";
-    } else {
-      displayMessage = error;
+        // Filter courses by unit code if provided
+        if (
+          unitCode &&
+          typeof unitCode === "string" &&
+          unitCode.trim() !== ""
+        ) {
+          const filtered = studentData.registeredCourses.filter(
+            (course) => course.courseCode === unitCode,
+          );
+          setFilteredCourses(filtered);
+        } else {
+          setFilteredCourses(studentData.registeredCourses);
+        }
+
+        setDisplayMessage("");
+      } catch (e) {
+        setParsedStudent(null);
+        setIsSuccess(false);
+        console.error("Failed to parse student data:", e);
+      }
+    } else if (typeof error === "string") {
+      setIsSuccess(false);
+      setParsedStudent(null);
+
+      // Set error message based on error type
+      if (error.includes("404")) {
+        setDisplayMessage(
+          "Student not found. Please try using the Registration Number instead.",
+        );
+      } else if (error.includes("500")) {
+        setDisplayMessage("Server error. Please try again later.");
+      } else if (error.includes("No response")) {
+        setDisplayMessage("Network error. Please check your connection.");
+      } else {
+        setDisplayMessage(error);
+      }
     }
-  }
+  }, [student, error, unitCode]);
+
+  // Update the storeVerification useEffect to include unit info
+  useEffect(() => {
+    const storeVerification = async () => {
+      if (isSuccess && parsedStudent) {
+        try {
+          // Ensure we have all required data for the record
+          const studentData = {
+            ...parsedStudent,
+            examCardNo: parsedStudent.examCardNo || parsedStudent.studentId,
+            verifiedUnit: unitCode || "", // Add verified unit
+            unitName: unitName || "", // Add unit name
+          };
+
+          await storeAttendanceRecord(studentData, "exam_card");
+          console.log("Attendance recorded successfully with unit:", unitCode);
+        } catch (err) {
+          console.error("Failed to store attendance:", err);
+        }
+      }
+    };
+
+    storeVerification();
+  }, [isSuccess, parsedStudent, unitCode, unitName]);
 
   const handleManualVerification = () => {
     router.push("/manual-verification");
@@ -74,7 +142,19 @@ export default function VerificationResult() {
             {isSuccess ? "Verification Successful" : "Verification Failed"}
           </Text>
           {isSuccess && parsedStudent && (
-            <Text style={styles.headerId}>ID: {parsedStudent.studentId}</Text>
+            <>
+              <Text style={styles.headerId}>ID: {parsedStudent.studentId}</Text>
+              {unitCode && (
+                <View style={styles.headerUnitBadge}>
+                  <MaterialIcons
+                    name="class"
+                    size={14}
+                    color="rgba(255,255,255,0.9)"
+                  />
+                  <Text style={styles.headerUnitText}>Unit: {unitCode}</Text>
+                </View>
+              )}
+            </>
           )}
         </LinearGradient>
 
@@ -149,39 +229,74 @@ export default function VerificationResult() {
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
                   <MaterialIcons name="menu-book" size={20} color="#6E3BFF" />
-                  <Text style={styles.cardTitle}>Registered Units</Text>
+                  <Text style={styles.cardTitle}>
+                    {unitCode ? `Unit: ${unitCode}` : "Registered Units"}
+                  </Text>
                   <Text style={styles.courseCount}>
-                    {parsedStudent.registeredCourses.length} Units
+                    {filteredCourses.length} {unitCode ? "Unit" : "Units"}
                   </Text>
                 </View>
 
-                {parsedStudent.registeredCourses.map((course: Course) => (
-                  <View key={course.courseCode} style={styles.courseItem}>
-                    <View style={styles.courseCodeContainer}>
-                      <Text style={styles.courseCode}>{course.courseCode}</Text>
-                    </View>
-                    <View style={styles.courseDetails}>
-                      <Text style={styles.courseName}>{course.courseName}</Text>
-                      <View
-                        style={[
-                          styles.verificationBadge,
-                          course.isVerified
-                            ? styles.verified
-                            : styles.notVerified,
-                        ]}
-                      >
-                        <MaterialIcons
-                          name={course.isVerified ? "verified" : "schedule"}
-                          size={14}
-                          color={course.isVerified ? "#4CAF50" : "#FF9800"}
-                        />
-                        <Text style={styles.verificationText}>
-                          {course.isVerified ? "Verified" : "Pending"}
+                {unitCode && (
+                  <View style={styles.unitInfoBadge}>
+                    <MaterialIcons name="class" size={16} color="#6E3BFF" />
+                    <Text style={styles.unitInfoText}>
+                      Showing only: {unitCode} - {unitName || unitCode}
+                    </Text>
+                  </View>
+                )}
+
+                {filteredCourses.length > 0 ? (
+                  filteredCourses.map((course: Course) => (
+                    <View key={course.courseCode} style={styles.courseItem}>
+                      <View style={styles.courseCodeContainer}>
+                        <Text style={styles.courseCode}>
+                          {course.courseCode}
                         </Text>
                       </View>
+                      <View style={styles.courseDetails}>
+                        <Text style={styles.courseName}>
+                          {course.courseName}
+                        </Text>
+                        <View
+                          style={[
+                            styles.verificationBadge,
+                            course.isVerified
+                              ? styles.verified
+                              : styles.notVerified,
+                          ]}
+                        >
+                          <MaterialIcons
+                            name={course.isVerified ? "verified" : "cancel"}
+                            size={14}
+                            color={course.isVerified ? "#4CAF50" : "#F44336"}
+                          />
+                          <Text style={styles.verificationText}>
+                            {course.isVerified ? "Verified" : "Not Registered"}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
+                  ))
+                ) : (
+                  <View style={styles.noCoursesContainer}>
+                    <MaterialIcons
+                      name="error-outline"
+                      size={40}
+                      color="#ccc"
+                    />
+                    <Text style={styles.noCoursesText}>
+                      {unitCode
+                        ? `No courses found for unit ${unitCode}`
+                        : "No registered courses"}
+                    </Text>
+                    {unitCode && (
+                      <Text style={styles.noCoursesSubtext}>
+                        This student is not registered for {unitCode}
+                      </Text>
+                    )}
                   </View>
-                ))}
+                )}
               </View>
             </>
           ) : (
@@ -303,6 +418,22 @@ const styles = StyleSheet.create({
   headerId: {
     fontSize: 16,
     color: "rgba(255,255,255,0.8)",
+    marginBottom: 5,
+  },
+  headerUnitBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 15,
+    marginTop: 5,
+  },
+  headerUnitText: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.9)",
+    marginLeft: 5,
+    fontWeight: "500",
   },
   content: {
     padding: 20,
@@ -354,6 +485,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     fontSize: 12,
     fontWeight: "bold",
+  },
+  unitInfoBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F0E7FF",
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 15,
+    justifyContent: "center",
+  },
+  unitInfoText: {
+    color: "#6E3BFF",
+    fontWeight: "500",
+    marginLeft: 5,
+    fontSize: 14,
   },
   infoRow: {
     flexDirection: "row",
@@ -431,6 +577,23 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
     marginBottom: 20,
+  },
+  noCoursesContainer: {
+    alignItems: "center",
+    padding: 30,
+  },
+  noCoursesText: {
+    textAlign: "center",
+    color: "#666",
+    fontSize: 16,
+    marginTop: 10,
+    marginBottom: 5,
+  },
+  noCoursesSubtext: {
+    textAlign: "center",
+    color: "#999",
+    fontSize: 14,
+    fontStyle: "italic",
   },
   buttonContainer: {
     flexDirection: "row",

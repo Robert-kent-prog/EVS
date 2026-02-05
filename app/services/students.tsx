@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://10.134.223.8:6000/api/students";
+const API_URL = "https://10.170.227.8:6000/api/students";
 
 interface StudentDetails {
   studentId: string;
@@ -18,7 +18,7 @@ interface StudentDetails {
 
 export const getStudentDetails = async (
   id: string,
-  token: string
+  token: string,
 ): Promise<StudentDetails> => {
   const response = await axios.get(`${API_URL}/${id}`, {
     headers: { Authorization: `Bearer ${token}` },

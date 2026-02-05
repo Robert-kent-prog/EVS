@@ -1,6 +1,7 @@
 import { Slot } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 import { QueryClient, QueryClientProvider } from "react-query";
+import { DatabaseProvider } from "./components/DatabaseProvider";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
@@ -21,10 +22,12 @@ function AuthLayout() {
 
 export default function RootLayout() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <AuthLayout />
-      </AuthProvider>
-    </QueryClientProvider>
+    <DatabaseProvider>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <AuthLayout />
+        </AuthProvider>
+      </QueryClientProvider>
+    </DatabaseProvider>
   );
 }

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://10.134.223.8:6000/api/history";
+const API_URL = "https://10.170.227.8:6000/api/history";
 
 interface VerificationLog {
   _id: string;
@@ -13,7 +13,7 @@ interface VerificationLog {
 }
 
 export const getVerificationHistory = async (
-  token: string
+  token: string,
 ): Promise<VerificationLog[]> => {
   const response = await axios.get(`${API_URL}`, {
     headers: { Authorization: `Bearer ${token}` },

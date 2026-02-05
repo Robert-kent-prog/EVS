@@ -124,7 +124,6 @@ export default function AuthForm({
                   : "Fill in your details to register"}
               </Text>
             </View>
-
             {type === "register" && (
               <TextInput
                 style={styles.input}
@@ -137,7 +136,6 @@ export default function AuthForm({
                 onSubmitEditing={() => staffNoInput.current?.focus()}
               />
             )}
-
             <TextInput
               ref={staffNoInput}
               style={styles.input}
@@ -153,7 +151,6 @@ export default function AuthForm({
                   : passwordInput.current?.focus()
               }
             />
-
             {type === "register" && (
               <TextInput
                 ref={emailInput}
@@ -168,7 +165,7 @@ export default function AuthForm({
                 onSubmitEditing={() => passwordInput.current?.focus()}
               />
             )}
-
+       
             <View style={styles.passwordContainer}>
               <TextInput
                 ref={passwordInput}
@@ -192,7 +189,6 @@ export default function AuthForm({
                 />
               </TouchableOpacity>
             </View>
-
             {type === "register" && (
               <View style={styles.roleContainer}>
                 <Text style={styles.roleLabel}>Role:</Text>
@@ -205,7 +201,6 @@ export default function AuthForm({
                 </View>
               </View>
             )}
-
             <TouchableOpacity
               style={[
                 styles.button,
@@ -219,11 +214,10 @@ export default function AuthForm({
                 {loading
                   ? "Please Wait..."
                   : type === "login"
-                  ? "Sign In"
-                  : "Sign Up"}
+                    ? "Sign In"
+                    : "Sign Up"}
               </Text>
             </TouchableOpacity>
-
             {type === "login" && onForgotPassword && (
               <TouchableOpacity
                 style={styles.forgotPasswordButton}
@@ -232,7 +226,6 @@ export default function AuthForm({
                 <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
               </TouchableOpacity>
             )}
-
             <View style={styles.footer}>
               <Text style={styles.footerText}>
                 {type === "login"

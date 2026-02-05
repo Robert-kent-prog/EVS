@@ -9,7 +9,13 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow EVS to save PDF files to your photo library.",
+        "NSPhotoLibraryAddUsageDescription": "Allow EVS to save PDF files to your photo library.",
+        "LSSupportsOpeningDocumentsInPlace": true,
+        "UISupportsDocumentBrowser": true
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -19,7 +25,10 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION",
+        "android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"
       ],
       "package": "com.user_name123.EVS"
     },
@@ -46,7 +55,16 @@
           "cameraPermission": "Allow EVS to access your camera."
         }
       ],
-      "expo-secure-store"
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow EVS to access your photos.",
+          "savePhotosPermission": "Allow EVS to save photos.",
+          "isAccessMediaLocationEnabled": true
+        }
+      ],
+      "expo-secure-store",
+      "expo-sqlite"
     ],
     "experiments": {
       "typedRoutes": true

@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { token, ...userDataWithoutToken } = updatedUser;
       await AsyncStorage.setItem(
         "userData",
-        JSON.stringify(userDataWithoutToken)
+        JSON.stringify(userDataWithoutToken),
       );
     } catch (error) {
       console.error("Update user error:", error);
@@ -100,14 +100,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     try {
       const response = await fetch(
-        "http://10.134.223.8:6000/api/verify-token",
+        "http://10.170.227.8:6000/api/verify-token",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${tokenToVerify}`,
           },
-        }
+        },
       );
       return response.ok;
     } catch (error) {
