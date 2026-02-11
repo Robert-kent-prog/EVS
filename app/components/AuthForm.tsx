@@ -23,7 +23,7 @@ interface AuthFormProps {
     staffNo: string,
     password: string,
     email?: string,
-    role?: "Invigilator" // Changed to specific literal type
+    role?: "Invigilator", // Changed to specific literal type
   ) => Promise<void>;
   loading: boolean;
   error?: string | null;
@@ -165,7 +165,7 @@ export default function AuthForm({
                 onSubmitEditing={() => passwordInput.current?.focus()}
               />
             )}
-       
+
             <View style={styles.passwordContainer}>
               <TextInput
                 ref={passwordInput}
@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
-    fontWeight: "bold",
+    // fontWeight: "bold",
   },
   passwordContainer: {
     position: "relative",

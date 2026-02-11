@@ -3519,6 +3519,11 @@ expo-image@~2.4.1:
   resolved "https://registry.npmmirror.com/expo-image/-/expo-image-2.4.1.tgz"
   integrity sha512-yHp0Cy4ylOYyLR21CcH6i70DeRyLRPc0yAIPFPn4BT/BpkJNaX5QMXDppcHa58t4WI3Bb8QRJRLuAQaeCtDF8A==
 
+expo-intent-launcher@~12.1.5:
+  version "12.1.5"
+  resolved "https://registry.npmmirror.com/expo-intent-launcher/-/expo-intent-launcher-12.1.5.tgz#ed3051292b33e131535d9b35ca20b48cf56d1364"
+  integrity sha512-KmCc/dJHTnVf2ZdrZhYSkvQ588K7qQW+nBGfJj5woCwhEXwYz1xOLQcShnPQgQWRf8conAvQDkI3pbjYNPcECw==
+
 expo-json-utils@~0.15.0:
   version "0.15.0"
   resolved "https://registry.npmjs.org/expo-json-utils/-/expo-json-utils-0.15.0.tgz"
