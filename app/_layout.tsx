@@ -3,6 +3,7 @@ import { ActivityIndicator, View } from "react-native";
 import { QueryClient, QueryClientProvider } from "react-query";
 import { DatabaseProvider } from "./components/DatabaseProvider";
 import { AuthProvider, useAuth } from "./context/AuthContext";
+import { StudentAuthProvider } from "./context/StudentAuthContext";
 
 const queryClient = new QueryClient();
 
@@ -25,7 +26,9 @@ export default function RootLayout() {
     <DatabaseProvider>
       <QueryClientProvider client={queryClient}>
         <AuthProvider>
-          <AuthLayout />
+          <StudentAuthProvider>
+            <AuthLayout />
+          </StudentAuthProvider>
         </AuthProvider>
       </QueryClientProvider>
     </DatabaseProvider>

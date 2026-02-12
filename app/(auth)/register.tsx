@@ -3,8 +3,9 @@ import { useState } from "react";
 import { Alert } from "react-native";
 import AuthForm from "../components/AuthForm";
 import { useAuth } from "../context/AuthContext";
+import { login, register as registerInvigilator } from "../services/auth";
 
-import { login, register } from "../services/auth";
+type UserRole = "Invigilator" | "Student";
 
 export default function RegisterScreen() {
   const router = useRouter();
@@ -13,41 +14,64 @@ export default function RegisterScreen() {
 
   const handleRegister = async (
     userName: string,
-    staffNo: string,
+    identifier: string,
     password: string,
     email?: string,
-    role?: "Invigilator" // Match the exact type
+    role: UserRole = "Invigilator",
   ) => {
     setLoading(true);
+
     try {
-      // Always use "Invigilator" as the role
-      await register(userName, staffNo, email || "", password, "Invigilator");
+      if (role === "Invigilator") {
+        // Register Invigilator
+        await registerInvigilator(
+          userName,
+          identifier, // staffNo
+          email || "",
+          password,
+          "Invigilator",
+        );
 
-      try {
-        const { token, user } = await login(staffNo, password);
-
-        await authLogin(token, {
-          userId: user._id,
-          userName: user.userName,
-          staffNo: user.staffNo,
-          role: "Invigilator", // Hardcoded to ensure type safety
-          email: user.email || "", // Ensure email is always present
-        });
-
-        router.replace("/(tabs)/home");
-      } catch (loginError) {
-        console.error("Auto-login error:", loginError);
+        // Auto-login after registration
+        try {
+          const { token, user } = await login(identifier, password);
+          await authLogin(token, {
+            userId: user._id,
+            userName: user.userName,
+            staffNo: user.staffNo,
+            role: "Invigilator",
+            email: user.email || "",
+          });
+          router.replace("/(tabs)/home");
+        } catch (loginError) {
+          console.error("Auto-login error:", loginError);
+          Alert.alert(
+            "Registration Successful",
+            "Please login with your credentials",
+            [{ text: "OK", onPress: () => router.replace("/(auth)/login") }],
+          );
+        }
+      } else {
+        // Student registration is handled by admin/backend
+        // Show message that students cannot self-register
         Alert.alert(
-          "Registration Successful",
-          "Please login with your credentials",
-          [{ text: "OK", onPress: () => router.replace("/(auth)/login") }]
+          "Student Registration",
+          "Student registration is handled by the academic office. Please contact the registrar's office for assistance.",
+          [{ text: "OK", onPress: () => router.replace("/(auth)/login") }],
         );
       }
     } catch (error) {
-      Alert.alert(
-        "Registration Failed",
-        error instanceof Error ? error.message : "An unknown error occurred"
-      );
+      let errorMessage = "An unknown error occurred";
+
+      if (error instanceof Error) {
+        if (error.message.includes("already exists")) {
+          errorMessage = "An account with this staff number already exists.";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      Alert.alert("Registration Failed", errorMessage);
     } finally {
       setLoading(false);
     }
@@ -59,7 +83,7 @@ export default function RegisterScreen() {
       onSubmit={handleRegister}
       loading={loading}
       onNavigateToLogin={() => router.replace("/(auth)/login")}
-      // No need to pass onForgotPassword for register screen
+      defaultRole="Invigilator"
     />
   );
 }
