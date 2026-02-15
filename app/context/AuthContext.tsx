@@ -99,7 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!tokenToVerify) return false;
 
     try {
-      const response = await fetch("http://10.47.156.8:6000/api/verify-token", {
+      const response = await fetch("http://10.145.89.8:6000/api/verify-token", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -78,6 +78,7 @@ export default function LoginScreen() {
         "Reset Link Sent",
         "Please check your email for password reset instructions",
       );
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       Alert.alert(
         "Error",

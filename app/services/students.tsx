@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_URL = "https://10.47.156.8:6000/api/students";
+const API_URL = "https://10.145.89.8:6000/api/students";
 
 interface StudentDetails {
   studentId: string;
