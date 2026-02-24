@@ -2,6 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { invigilatorTheme } from "../theme/invigilatorTheme";
 
 export default function ProfileMenu() {
   const [visible, setVisible] = useState(false);
@@ -24,7 +25,11 @@ export default function ProfileMenu() {
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => setVisible(!visible)}>
-        <MaterialIcons name="account-circle" size={60} color="#6E3BFF" />
+        <MaterialIcons
+          name="account-circle"
+          size={56}
+          color={invigilatorTheme.colors.primary}
+        />
       </TouchableOpacity>
 
       {visible && (
@@ -74,6 +79,8 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 5,
     zIndex: 100,
+    borderWidth: 1,
+    borderColor: invigilatorTheme.colors.border,
   },
   menuItem: {
     flexDirection: "row",

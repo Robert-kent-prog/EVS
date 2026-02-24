@@ -1,13 +1,37 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
+import { useCallback, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import VerificationCard from "../components/VerificationCard";
 import { useAuth } from "../context/AuthContext";
 import ProfileMenu from "../profile/ProfileMenu";
+import { getAttendanceStatistics } from "../services/database";
+import { invigilatorTheme } from "../theme/invigilatorTheme";
 
 export default function HomeScreen() {
   const { user, logout } = useAuth();
+  const [todayVerified, setTodayVerified] = useState(0);
+  const [todayIssues, setTodayIssues] = useState(0);
+
+  const loadStats = useCallback(async () => {
+    try {
+      const stats = await getAttendanceStatistics();
+      setTodayVerified(stats.todaysEligible || 0);
+      setTodayIssues(stats.todaysIssues || 0);
+    } catch {
+      setTodayVerified(0);
+      setTodayIssues(0);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadStats();
+    }, [loadStats]),
+  );
 
   return (
     <LinearGradient
@@ -15,7 +39,7 @@ export default function HomeScreen() {
       style={styles.gradientContainer}
     >
       <StatusBar style="dark" />
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top"]}>
         {/* Header Section */}
         <View style={styles.header}>
           <View style={styles.userInfo}>
@@ -37,42 +61,26 @@ export default function HomeScreen() {
             description="Verify student exam eligibility by scanning their barcode/QR code"
             icon="qrcode" // Correct MaterialIcons name
             route="./scan"
-            colors={["#6E3BFF", "#8D5EF2"]}
+            colors={["#0066cc", "#1a7be6"]}
           />
           <VerificationCard
             title="Reports Generation"
             description="View attendance reports and statistics"
             icon="qrcode"
             route="../reports"
-            colors={["#6E3BFF", "#8D5EF2"]}
+            colors={["#0066cc", "#1a7be6"]}
           />
-
-          <VerificationCard
-            title="Students Record"
-            description="Student attendance records and history"
-            icon="qrcode"
-            route="../screens/studentDashboard"
-            colors={["#6E3BFF", "#8D5EF2"]}
-          />
-          {/* 
-          <VerificationCard
-            title="Verification History"
-            description="View your recent verification activities"
-            icon="history"
-            route="./history"
-            colors={["#4CAF50", "#66BB6A"]}
-          /> */}
 
           {/* Stats Section */}
           <View style={styles.statsContainer}>
             <View style={styles.statCard}>
               <MaterialIcons name="verified" size={24} color="#4CAF50" />
-              <Text style={styles.statNumber}>52</Text>
+              <Text style={styles.statNumber}>{todayVerified}</Text>
               <Text style={styles.statLabel}>Verified Today</Text>
             </View>
             <View style={styles.statCard}>
               <MaterialIcons name="error" size={24} color="#F44336" />
-              <Text style={styles.statNumber}>3</Text>
+              <Text style={styles.statNumber}>{todayIssues}</Text>
               <Text style={styles.statLabel}>Issues</Text>
             </View>
           </View>
@@ -83,7 +91,7 @@ export default function HomeScreen() {
           <MaterialIcons name="logout" size={20} color="#F44336" />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
-      </View>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
@@ -95,7 +103,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 25,
-    paddingTop: 50,
+    paddingTop: 12,
   },
   header: {
     flexDirection: "row",
@@ -118,8 +126,8 @@ const styles = StyleSheet.create({
   },
   userRole: {
     fontSize: 14,
-    color: "#6E3BFF",
-    backgroundColor: "#F0E7FF",
+    color: invigilatorTheme.colors.primary,
+    backgroundColor: invigilatorTheme.colors.primarySoft,
     alignSelf: "flex-start",
     paddingHorizontal: 10,
     paddingVertical: 3,
@@ -172,11 +180,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 15,
-    backgroundColor: "rgba(244, 67, 54, 0.1)",
+    backgroundColor: "rgba(198, 40, 40, 0.08)",
     borderRadius: 10,
     marginTop: 20,
     borderWidth: 1,
-    borderColor: "rgba(244, 67, 54, 0.2)",
+    borderColor: "rgba(198, 40, 40, 0.2)",
   },
   logoutText: {
     color: "#F44336",

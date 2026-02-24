@@ -1,6 +1,7 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
   Alert,
@@ -10,8 +11,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
 import { deleteAccount } from "../services/auth";
+import { invigilatorTheme } from "../theme/invigilatorTheme";
 
 export default function DeleteAccountScreen() {
   const { user, logout } = useAuth();
@@ -54,10 +57,9 @@ export default function DeleteAccountScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={["#F8F9FF", "#EFF1FF"]}
-      style={styles.gradientContainer}
-    >
+    <LinearGradient colors={["#F8F9FF", "#EFF1FF"]} style={styles.gradientContainer}>
+      <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+      <StatusBar style="dark" />
       {/* Back Button */}
       <Pressable style={styles.backButton} onPress={() => router.back()}>
         <AntDesign name="close" size={28} color="#F44336" />
@@ -86,6 +88,7 @@ export default function DeleteAccountScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   button: {
-    backgroundColor: "#F44336",
+    backgroundColor: invigilatorTheme.colors.danger,
     padding: 15,
     borderRadius: 10,
     alignItems: "center",

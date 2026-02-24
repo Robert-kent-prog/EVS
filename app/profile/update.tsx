@@ -1,6 +1,7 @@
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { LinearGradient } from "expo-linear-gradient";
 import { router } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
 import {
   Alert,
@@ -11,8 +12,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
 import { updateProfile } from "../services/auth";
+import { invigilatorTheme } from "../theme/invigilatorTheme";
 
 export default function UpdateProfileScreen() {
   const { user, updateUser } = useAuth(); // Get updateUser from context
@@ -51,13 +54,12 @@ export default function UpdateProfileScreen() {
   };
 
   return (
-    <LinearGradient
-      colors={["#F8F9FF", "#EFF1FF"]}
-      style={styles.gradientContainer}
-    >
+    <LinearGradient colors={["#F8F9FF", "#EFF1FF"]} style={styles.gradientContainer}>
+      <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
+      <StatusBar style="dark" />
       {/* Back Button */}
       <Pressable style={styles.backButton} onPress={() => router.back()}>
-        <AntDesign name="arrowleft" size={28} color="" />
+        <AntDesign name="arrowleft" size={24} color={invigilatorTheme.colors.primary} />
       </Pressable>
 
       <View style={styles.container}>
@@ -106,6 +108,7 @@ export default function UpdateProfileScreen() {
           </Text>
         </TouchableOpacity>
       </View>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
@@ -161,7 +164,7 @@ const styles = StyleSheet.create({
     borderColor: "#E0E0E0",
   },
   button: {
-    backgroundColor: "#6E3BFF",
+    backgroundColor: invigilatorTheme.colors.primary,
     padding: 15,
     borderRadius: 10,
     alignItems: "center",

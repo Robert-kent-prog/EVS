@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { StatusBar } from "expo-status-bar";
 import {
   ActivityIndicator,
   FlatList,
@@ -9,9 +10,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "react-query";
 import HistoryItem from "./components/HistoryItem";
 import { useAuth } from "./context/AuthContext";
+import { invigilatorTheme } from "./theme/invigilatorTheme";
 
 const mockVerificationHistory = [
   {
@@ -139,7 +142,8 @@ export default function HistoryScreen() {
       colors={["#F8F9FF", "#EFF1FF"]}
       style={styles.gradientContainer}
     >
-      <View style={styles.container}>
+      <SafeAreaView style={styles.container} edges={["top"]}>
+        <StatusBar style="dark" />
         <View style={styles.header}>
           <Text style={styles.title}>Verification History</Text>
           <View style={styles.statsContainer}>
@@ -192,7 +196,7 @@ export default function HistoryScreen() {
           }
           showsVerticalScrollIndicator={false}
         />
-      </View>
+      </SafeAreaView>
     </LinearGradient>
   );
 }
@@ -238,7 +242,7 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     marginTop: 20,
-    backgroundColor: "#6E3BFF",
+    backgroundColor: invigilatorTheme.colors.primary,
     paddingHorizontal: 25,
     paddingVertical: 12,
     borderRadius: 8,
@@ -277,7 +281,7 @@ const styles = StyleSheet.create({
   statNumber: {
     fontSize: 22,
     fontWeight: "bold",
-    color: "#6E3BFF",
+    color: invigilatorTheme.colors.primary,
   },
   statLabel: {
     fontSize: 12,

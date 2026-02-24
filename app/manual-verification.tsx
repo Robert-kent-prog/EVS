@@ -1,5 +1,6 @@
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
   BackHandler,
@@ -13,8 +14,10 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "./context/AuthContext";
 import { verifyByStudentId } from "./services/verification";
+import { invigilatorTheme } from "./theme/invigilatorTheme";
 
 export default function ManualVerification() {
   const [regNumber, setRegNumber] = useState("");
@@ -78,7 +81,9 @@ export default function ManualVerification() {
   };
 
   return (
-    <KeyboardAvoidingView
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <StatusBar style="dark" />
+      <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
@@ -86,7 +91,11 @@ export default function ManualVerification() {
         <View style={styles.innerContainer}>
           {/* Back Button */}
           <TouchableOpacity style={styles.backButton} onPress={handleBack}>
-            <Ionicons name="arrow-back" size={24} color="#6E3BFF" />
+            <Ionicons
+              name="arrow-back"
+              size={24}
+              color={invigilatorTheme.colors.primary}
+            />
           </TouchableOpacity>
 
           <View style={styles.card}>
@@ -123,14 +132,15 @@ export default function ManualVerification() {
           </View>
         </View>
       </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FF",
+    backgroundColor: invigilatorTheme.colors.bg,
   },
   innerContainer: {
     flex: 1,
@@ -143,11 +153,11 @@ const styles = StyleSheet.create({
     left: 20,
     zIndex: 1,
     backgroundColor: "white",
-    borderRadius: 20,
+    borderRadius: 14,
     padding: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 3,
   },
@@ -160,6 +170,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 10,
     elevation: 5,
+    borderWidth: 1,
+    borderColor: invigilatorTheme.colors.border,
     marginBottom: 20,
   },
   title: {
@@ -179,7 +191,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: invigilatorTheme.colors.border,
     borderRadius: 12,
     paddingHorizontal: 15,
     paddingVertical: 12,
@@ -192,11 +204,11 @@ const styles = StyleSheet.create({
     color: "#333",
   },
   button: {
-    backgroundColor: "#6E3BFF",
+    backgroundColor: invigilatorTheme.colors.primary,
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
-    shadowColor: "#6E3BFF",
+    shadowColor: invigilatorTheme.colors.primary,
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: 8,

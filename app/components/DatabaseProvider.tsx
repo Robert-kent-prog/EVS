@@ -24,9 +24,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   const initDatabase = async () => {
     try {
       setError(null);
-      console.log("Initializing database...");
       await initializeDatabase();
-      console.log("Database initialized successfully");
       setIsInitialized(true);
     } catch (err) {
       const errorMessage = `Failed to initialize database: ${err}`;
@@ -49,9 +47,6 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (error && retryCount < 3) {
       const timer = setTimeout(() => {
-        console.log(
-          `Retrying database initialization (attempt ${retryCount + 1})`,
-        );
         initDatabase();
       }, 2000);
 

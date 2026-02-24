@@ -9,7 +9,7 @@ import {
   StudentAuthResponse,
 } from "../types";
 
-const BASE_URL = "http://10.139.26.8:6000/api";
+const BASE_URL = "http://10.66.224.8:6000/api";
 
 class ApiService {
   private api: AxiosInstance;

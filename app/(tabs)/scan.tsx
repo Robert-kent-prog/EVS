@@ -1,6 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import axios from "axios";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -12,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import BarcodeScanner from "../components/BarcodeScanner";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -21,6 +23,7 @@ import {
   Unit,
 } from "../services/unit"; // Import unit services
 import { verifyByExamCard } from "../services/verification";
+import { invigilatorTheme } from "../theme/invigilatorTheme";
 
 export default function ScanScreen() {
   const [scanning, setScanning] = useState(false);
@@ -162,7 +165,8 @@ export default function ScanScreen() {
   const isStartScanningDisabled = !currentUnit || loading;
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <StatusBar style="dark" />
       {/* Unit Section */}
       <View style={styles.unitSection}>
         <View style={styles.unitHeader}>
@@ -362,25 +366,28 @@ export default function ScanScreen() {
           </View>
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: invigilatorTheme.colors.bg,
   },
   unitSection: {
     backgroundColor: "white",
     padding: 15,
     marginHorizontal: 20,
     marginTop: 20,
-    borderRadius: 10,
+    borderRadius: 12,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.06,
     shadowRadius: 4,
     elevation: 3,
+    borderWidth: 1,
+    borderColor: invigilatorTheme.colors.border,
   },
   unitHeader: {
     flexDirection: "row",
@@ -391,14 +398,14 @@ const styles = StyleSheet.create({
   unitTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#333",
+    color: invigilatorTheme.colors.text,
   },
   inputRow: {
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ddd",
-    borderRadius: 8,
+    borderColor: invigilatorTheme.colors.border,
+    borderRadius: 10,
     paddingHorizontal: 10,
     marginBottom: 10,
   },
@@ -479,7 +486,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#eef3f9",
   },
   icon: {
     marginBottom: 20,
@@ -520,6 +527,8 @@ const styles = StyleSheet.create({
   controls: {
     padding: 20,
     backgroundColor: "white",
+    borderTopWidth: 1,
+    borderTopColor: invigilatorTheme.colors.border,
   },
   button: {
     padding: 15,
@@ -596,7 +605,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#E0E0E0",
   },
   verifyButton: {
-    backgroundColor: "#6E3BFF",
+    backgroundColor: invigilatorTheme.colors.primary,
   },
   modalButtonText: {
     fontWeight: "bold",

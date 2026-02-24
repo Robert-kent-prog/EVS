@@ -2,7 +2,7 @@
 import axios, { AxiosResponse } from "axios";
 import * as FileSystem from "expo-file-system";
 
-const API_URL = "http://10.139.26.8:6000/api/pdf"; // Updated base URL
+const API_URL = "http://10.66.224.8:6000/api/pdf"; // Updated base URL
 
 // Types
 export interface PDFGenerationRequest {

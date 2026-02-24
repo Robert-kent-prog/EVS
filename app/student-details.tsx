@@ -1,6 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import {
   ActivityIndicator,
   ScrollView,
@@ -8,7 +9,9 @@ import {
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "react-query";
+import { invigilatorTheme } from "./theme/invigilatorTheme";
 
 // Mock data - replace with your actual data structure
 const mockStudentDetails = {
@@ -290,7 +293,7 @@ export default function StudentDetails() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6E3BFF" />
+        <ActivityIndicator size="large" color={invigilatorTheme.colors.primary} />
       </View>
     );
   }
@@ -306,14 +309,16 @@ export default function StudentDetails() {
   }
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header Section */}
-      <LinearGradient
-        colors={["#6E3BFF", "#8D5EF2"]}
-        style={styles.header}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-      >
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <StatusBar style="dark" />
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        {/* Header Section */}
+        <LinearGradient
+          colors={["#0066cc", "#1a7be6"]}
+          style={styles.header}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>
             {student.fullName
@@ -324,7 +329,7 @@ export default function StudentDetails() {
         </View>
         <Text style={styles.studentName}>{student.fullName}</Text>
         <Text style={styles.headerId}>ID: {student.studentId}</Text>
-      </LinearGradient>
+        </LinearGradient>
 
       {/* Main Content */}
       <View style={styles.content}>
@@ -417,7 +422,8 @@ export default function StudentDetails() {
           </Text>
         </View>
       </View>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 

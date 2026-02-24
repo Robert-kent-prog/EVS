@@ -1,6 +1,7 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect, useState } from "react";
 import {
   ScrollView,
@@ -9,8 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 // Add to your existing imports
 import { storeAttendanceRecord } from "./services/database";
+import { invigilatorTheme } from "./theme/invigilatorTheme";
 
 // Define your student interface based on your API response
 interface Student {
@@ -119,14 +122,15 @@ export default function VerificationResult() {
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container} edges={["top"]}>
+      <StatusBar style="dark" />
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
         {/* Header Section */}
         <LinearGradient
-          colors={isSuccess ? ["#6E3BFF", "#8D5EF2"] : ["#F44336", "#FF5252"]}
+          colors={isSuccess ? ["#0066cc", "#1a7be6"] : ["#F44336", "#FF5252"]}
           style={styles.header}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -343,14 +347,14 @@ export default function VerificationResult() {
           </Text>
         </TouchableOpacity>
       </View>
-    </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F8F9FF",
+    backgroundColor: invigilatorTheme.colors.bg,
     position: "relative", // Needed for absolute positioning of floating button
   },
   scrollView: {
@@ -370,7 +374,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   floatingButton: {
-    backgroundColor: "#6E3BFF",
+    backgroundColor: invigilatorTheme.colors.primary,
     borderRadius: 30,
     paddingVertical: 12,
     paddingHorizontal: 20,
@@ -478,8 +482,8 @@ const styles = StyleSheet.create({
   },
   courseCount: {
     marginLeft: "auto",
-    backgroundColor: "#F0E7FF",
-    color: "#6E3BFF",
+    backgroundColor: invigilatorTheme.colors.primarySoft,
+    color: invigilatorTheme.colors.primary,
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 12,
@@ -489,14 +493,14 @@ const styles = StyleSheet.create({
   unitInfoBadge: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F0E7FF",
+    backgroundColor: invigilatorTheme.colors.primarySoft,
     padding: 8,
     borderRadius: 8,
     marginBottom: 15,
     justifyContent: "center",
   },
   unitInfoText: {
-    color: "#6E3BFF",
+    color: invigilatorTheme.colors.primary,
     fontWeight: "500",
     marginLeft: 5,
     fontSize: 14,
@@ -525,7 +529,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "#f5f5f5",
   },
   courseCodeContainer: {
-    backgroundColor: "#F0E7FF",
+    backgroundColor: invigilatorTheme.colors.primarySoft,
     borderRadius: 8,
     width: 60,
     height: 60,
@@ -535,7 +539,7 @@ const styles = StyleSheet.create({
   },
   courseCode: {
     fontWeight: "bold",
-    color: "#6E3BFF",
+    color: invigilatorTheme.colors.primary,
     fontSize: 16,
   },
   courseDetails: {
@@ -613,7 +617,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   manualVerifyButton: {
-    backgroundColor: "#6E3BFF",
+    backgroundColor: invigilatorTheme.colors.primary,
     padding: 15,
     borderRadius: 10,
     width: "100%",

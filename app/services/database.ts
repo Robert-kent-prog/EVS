@@ -35,11 +35,6 @@ export async function openDatabase() {
 export async function initializeDatabase() {
   const db = await openDatabase();
 
-  // Drop existing table and create fresh with new schema
-  await db.execAsync(`
-    DROP TABLE IF EXISTS attendance_records;
-  `);
-
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
     
@@ -59,7 +54,12 @@ export async function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_status ON attendance_records(status);
   `);
 
-  console.log("Database initialized successfully...");
+  // Keep the local DB lean by pruning stale history.
+  await db.runAsync(
+    `DELETE FROM attendance_records
+     WHERE DATE(timestamp) < DATE('now', '-90 day')`,
+  );
+
   return db;
 }
 
@@ -84,11 +84,31 @@ export async function storeAttendanceRecord(
       verificationMethod,
     };
 
-    // console.log("Storing simplified attendance record:", {
-    //   studentId: record.studentId,
-    //   status: record.status,
-    //   timestamp: record.timestamp,
-    // });
+    const existingToday = await db.getFirstAsync<{ id: number }>(
+      `SELECT id
+       FROM attendance_records
+       WHERE studentId = ?
+       AND DATE(timestamp) = DATE('now')
+       LIMIT 1`,
+      [record.studentId],
+    );
+
+    if (existingToday?.id) {
+      await db.runAsync(
+        `UPDATE attendance_records
+         SET fullName = ?, status = ?, academicYear = ?, timestamp = ?, verificationMethod = ?
+         WHERE id = ?`,
+        [
+          record.fullName,
+          record.status,
+          record.academicYear,
+          record.timestamp,
+          record.verificationMethod,
+          existingToday.id,
+        ],
+      );
+      return existingToday.id;
+    }
 
     const result = await db.runAsync(
       `INSERT INTO attendance_records 
@@ -104,7 +124,6 @@ export async function storeAttendanceRecord(
       ],
     );
 
-    // console.log("Attendance stored successfully:", result.lastInsertRowId);
     return result.lastInsertRowId;
   } catch (error) {
     console.error("Error storing attendance record:", error);
@@ -187,7 +206,7 @@ export async function getAttendanceStatistics() {
       throw new Error("Database connection not available");
     }
 
-    const [totalResult, eligibleResult, todayResult] = await Promise.all([
+    const [totalResult, eligibleResult, todayResult, todayEligibleResult] = await Promise.all([
       db.getFirstAsync<{ count: number }>(
         "SELECT COUNT(*) as count FROM attendance_records",
       ),
@@ -198,12 +217,23 @@ export async function getAttendanceStatistics() {
         `SELECT COUNT(*) as count FROM attendance_records 
          WHERE DATE(timestamp) = DATE('now')`,
       ),
+      db.getFirstAsync<{ count: number }>(
+        `SELECT COUNT(*) as count FROM attendance_records
+         WHERE DATE(timestamp) = DATE('now')
+         AND status = 'eligible'`,
+      ),
     ]);
+
+    const todaysCount = todayResult?.count || 0;
+    const todaysEligible = todayEligibleResult?.count || 0;
+    const todaysIssues = todaysCount - todaysEligible;
 
     return {
       totalStudents: totalResult?.count || 0,
       eligibleStudents: eligibleResult?.count || 0,
-      todaysCount: todayResult?.count || 0,
+      todaysCount,
+      todaysEligible,
+      todaysIssues,
       ineligibleStudents:
         (totalResult?.count || 0) - (eligibleResult?.count || 0),
     };

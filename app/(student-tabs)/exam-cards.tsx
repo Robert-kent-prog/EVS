@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import React, { useCallback, useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useState } from "react";
 import {
   Alert,
   FlatList,
@@ -30,7 +31,7 @@ export default function ExamCardsScreen() {
   const [previewCard, setPreviewCard] = useState<ExamCard | null>(null);
   const [showPreview, setShowPreview] = useState(false);
 
-  const loadExamCards = useCallback(async () => {
+  const loadExamCards = useCallback(async (showLoader: boolean = true) => {
     if (!student) {
       setLoading(false);
       setRefreshing(false);
@@ -38,7 +39,9 @@ export default function ExamCardsScreen() {
     }
 
     try {
-      setLoading(true);
+      if (showLoader) {
+        setLoading(true);
+      }
       const cards = await api.getStudentExamCards(student.studentId);
       setExamCards(cards);
     } catch (error) {
@@ -50,9 +53,11 @@ export default function ExamCardsScreen() {
     }
   }, [student]);
 
-  useEffect(() => {
-    loadExamCards();
-  }, [loadExamCards]);
+  useFocusEffect(
+    useCallback(() => {
+      loadExamCards(false);
+    }, [loadExamCards]),
+  );
 
   const handleDownload = async (examCard: ExamCard) => {
     try {
@@ -242,7 +247,7 @@ export default function ExamCardsScreen() {
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={loadExamCards} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => loadExamCards(false)} />
         }
       />
 
