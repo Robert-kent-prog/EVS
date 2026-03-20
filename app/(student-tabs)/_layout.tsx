@@ -54,6 +54,15 @@ export default function StudentTabLayout() {
         }}
       />
       <Tabs.Screen
+        name="lecturer-evaluations"
+        options={{
+          title: "Evaluations",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialIcons name="rate-review" size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",

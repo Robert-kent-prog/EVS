@@ -1,6 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useMemo, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Image,
@@ -42,6 +42,11 @@ const questionLabels: Record<QuestionKey, string> = {
 };
 
 export default function LecturerEvaluationScreen() {
+  const { unitCode: unitCodeParam, unitTitle: unitTitleParam } =
+    useLocalSearchParams<{
+      unitCode?: string;
+      unitTitle?: string;
+    }>();
   const router = useRouter();
   const { student, updateStudent } = useStudentAuth();
   const [degreeProgramme, setDegreeProgramme] = useState("");
@@ -61,6 +66,15 @@ export default function LecturerEvaluationScreen() {
     lecturerCoveredAllTopics: null,
   });
   const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (typeof unitCodeParam === "string" && unitCodeParam.trim()) {
+      setUnitCode(unitCodeParam.toUpperCase());
+    }
+    if (typeof unitTitleParam === "string" && unitTitleParam.trim()) {
+      setUnitTitle(unitTitleParam);
+    }
+  }, [unitCodeParam, unitTitleParam]);
 
   const missingFields = useMemo(() => {
     const missing: string[] = [];
@@ -99,6 +113,14 @@ export default function LecturerEvaluationScreen() {
       return;
     }
 
+    if (!student.registeredCourses || student.registeredCourses.length === 0) {
+      Alert.alert(
+        "No Units Registered",
+        "You must register units before submitting lecturer evaluations.",
+      );
+      return;
+    }
+
     if (missingFields.length > 0) {
       Alert.alert(
         "Incomplete Form",
@@ -129,10 +151,13 @@ export default function LecturerEvaluationScreen() {
       };
 
       const response = await api.submitLecturerEvaluation(payload);
-      const lastSubmittedAt = response?.data?.lastSubmittedAt || new Date().toISOString();
+      const lastSubmittedAt =
+        response?.data?.lastSubmittedAt || new Date().toISOString();
       await updateStudent({
         lecturerEvaluations: {
-          completed: true,
+          completed: !!response?.data?.completed,
+          requiredUnits: response?.data?.requiredUnits || 0,
+          completedUnits: response?.data?.completedUnits || 0,
           lastSubmittedAt,
         },
       });
@@ -140,7 +165,12 @@ export default function LecturerEvaluationScreen() {
       Alert.alert(
         "Submitted",
         "Lecturer evaluation submitted successfully.",
-        [{ text: "OK", onPress: () => router.replace("/(student-tabs)/dashboard") }],
+        [
+          {
+            text: "OK",
+            onPress: () => router.replace("/(student-tabs)/lecturer-evaluations"),
+          },
+        ],
       );
     } catch (error: any) {
       Alert.alert(
@@ -153,7 +183,7 @@ export default function LecturerEvaluationScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={["top"]}>
+    <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
       <StatusBar barStyle="dark-content" backgroundColor="#f7f9fc" />
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
@@ -324,7 +354,7 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 16,
-    paddingBottom: 40,
+    paddingBottom: 120,
   },
   header: {
     backgroundColor: "#fff",
@@ -456,4 +486,3 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
 });
-

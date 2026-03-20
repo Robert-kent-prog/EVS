@@ -23,6 +23,9 @@ export interface Student {
   lecturerEvaluations?: {
     completed: boolean;
     lastSubmittedAt?: string;
+    requiredUnits?: number;
+    completedUnits?: number;
+    evaluatedUnitCodes?: string[];
   };
 }
 
@@ -41,6 +44,26 @@ export interface LecturerEvaluationPayload {
   lecturerAttendedAllLectures: boolean;
   unitRelevantToDegree: boolean;
   lecturerCoveredAllTopics: boolean;
+}
+
+export interface LecturerEvaluationRecord extends LecturerEvaluationPayload {
+  _id: string;
+  unitCode: string;
+  unitTitle: string;
+  lecturerName: string;
+  academicYear: string;
+  submittedAt: string;
+  updatedAt?: string;
+}
+
+export interface LecturerEvaluationStatus {
+  completed: boolean;
+  requiredUnits: number;
+  completedUnits: number;
+  hasRegisteredUnits: boolean;
+  requiredUnitCodes: string[];
+  missingUnitCodes: string[];
+  lastSubmittedAt: string | null;
 }
 
 export interface ExamCard {
@@ -113,6 +136,8 @@ export interface EligibilityStatus {
     met: boolean;
   }[];
   missingEvaluations?: string[];
+  completedEvaluationUnits?: number;
+  requiredEvaluationUnits?: number;
   message?: string;
 }
 // app/types/index.ts

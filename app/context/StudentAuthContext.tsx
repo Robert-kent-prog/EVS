@@ -204,13 +204,22 @@ export const StudentAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const updateStudent = async (payload: Partial<Student>) => {
-    dispatch({ type: "UPDATE_STUDENT", payload });
-
     if (!state.student) {
       return;
     }
 
-    const updatedStudent = { ...state.student, ...payload };
+    const mergedPayload: Partial<Student> = {
+      ...payload,
+      lecturerEvaluations: payload.lecturerEvaluations
+        ? {
+            ...(state.student.lecturerEvaluations || {}),
+            ...payload.lecturerEvaluations,
+          }
+        : state.student.lecturerEvaluations,
+    };
+
+    dispatch({ type: "UPDATE_STUDENT", payload: mergedPayload });
+    const updatedStudent = { ...state.student, ...mergedPayload };
     await AsyncStorage.setItem(STUDENT_DATA_KEY, JSON.stringify(updatedStudent));
   };
 

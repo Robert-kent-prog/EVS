@@ -6,7 +6,9 @@ import {
   ExamCard,
   Invigilator,
   InvigilatorAuthResponse,
+  LecturerEvaluationRecord,
   LecturerEvaluationPayload,
+  LecturerEvaluationStatus,
   Student,
   StudentAuthResponse,
 } from "../types";
@@ -429,17 +431,30 @@ class ApiService {
 
   async submitLecturerEvaluation(
     payload: LecturerEvaluationPayload,
-  ): Promise<{ success: boolean; message: string; data?: any }> {
+  ): Promise<{ success: boolean; message: string; data?: LecturerEvaluationStatus }> {
     const response = await this.studentPost("/student/evaluations", payload);
     return response.data;
   }
 
   async getLecturerEvaluationStatus(
     studentId: string,
-  ): Promise<{ completed: boolean; lastSubmittedAt: string | null }> {
+  ): Promise<LecturerEvaluationStatus> {
     const response = await this.studentGet(
       `/student/${studentId}/lecturer-evaluation-status`,
     );
+    return response.data.data || response.data;
+  }
+
+  async getStudentLecturerEvaluations(): Promise<{
+    evaluations: LecturerEvaluationRecord[];
+    requiredUnitCodes: string[];
+    missingUnitCodes: string[];
+    requiredUnits: number;
+    completedUnits: number;
+    completed: boolean;
+    hasRegisteredUnits: boolean;
+  }> {
+    const response = await this.studentGet("/student/evaluations");
     return response.data.data || response.data;
   }
 }

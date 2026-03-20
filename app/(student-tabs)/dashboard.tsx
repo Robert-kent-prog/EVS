@@ -12,15 +12,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import EligibilityCard from "../components/EligibilityCard";
 import { useStudentAuth } from "../context/StudentAuthContext";
 import api from "../services/api";
 import { EligibilityStatus } from "../types";
-import { checkExamCardEligibility } from "../utils/eligibility";
 
 export default function StudentDashboard() {
   const { student, logout } = useStudentAuth();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [refreshing, setRefreshing] = useState(false);
   const [eligibility, setEligibility] = useState<EligibilityStatus | null>(null);
   const [loading, setLoading] = useState(false);
@@ -55,14 +56,8 @@ export default function StudentDashboard() {
   const handleGenerateExamCard = async () => {
     if (!student) return;
 
-    // Double check eligibility before generating
-    const { isEligible, reasons } = checkExamCardEligibility(student);
-
-    if (!isEligible) {
-      Alert.alert(
-        "Not Eligible",
-        `You cannot generate an exam card yet:\n\n${reasons.map(r => `• ${r}`).join('\n')}`
-      );
+    if (!eligibility?.isEligible) {
+      Alert.alert("Not Eligible", eligibility?.message || "Requirements not met.");
       return;
     }
 
@@ -97,7 +92,7 @@ export default function StudentDashboard() {
   };
 
   const handleOpenEvaluation = () => {
-    router.push("/(student-tabs)/lecturer-evaluation");
+    router.push("/(student-tabs)/lecturer-evaluations");
   };
 
   if (!student) {
@@ -138,6 +133,9 @@ export default function StudentDashboard() {
 
       <ScrollView
         style={styles.content}
+        contentContainerStyle={{
+          paddingBottom: insets.bottom + 90,
+        }}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
@@ -147,10 +145,25 @@ export default function StudentDashboard() {
           eligibility={eligibility}
           onGenerate={handleGenerateExamCard}
           loading={loading}
-          disabled={!checkExamCardEligibility(student).isEligible}
+          disabled={!(eligibility?.isEligible ?? false)}
         />
 
-        {eligibility && !eligibility.evaluationsComplete && (
+        {eligibility && !eligibility.hasRegisteredUnits && (
+          <View style={styles.evaluationCard}>
+            <View style={styles.evaluationHeader}>
+              <MaterialIcons name="info" size={20} color="#D35400" />
+              <Text style={styles.evaluationTitle}>Unit Registration Needed</Text>
+            </View>
+            <Text style={styles.evaluationDescription}>
+              You do not have registered units yet. Register units first, then
+              evaluate all lecturers.
+            </Text>
+          </View>
+        )}
+
+        {eligibility &&
+          eligibility.hasRegisteredUnits &&
+          !eligibility.evaluationsComplete && (
           <View style={styles.evaluationCard}>
             <View style={styles.evaluationHeader}>
               <MaterialIcons name="rate-review" size={20} color="#8E44AD" />
