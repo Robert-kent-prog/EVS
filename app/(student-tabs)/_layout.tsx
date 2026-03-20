@@ -62,6 +62,12 @@ export default function StudentTabLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="lecturer-evaluation"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

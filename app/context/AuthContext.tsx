@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { buildApiUrl } from "../config/api";
 
 interface User {
   userId: string;
@@ -99,13 +100,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!tokenToVerify) return false;
 
     try {
-      const response = await fetch("http://10.66.224.8:6000/api/verify-token", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${tokenToVerify}`,
+      const response = await fetch(
+        buildApiUrl("/verify-token"),
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${tokenToVerify}`,
+          },
         },
-      });
+      );
       return response.ok;
     } catch (error) {
       console.error("Token verification error:", error);

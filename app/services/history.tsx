@@ -1,6 +1,7 @@
 import axios from "axios";
+import { buildApiUrl } from "../config/api";
 
-const API_URL = "https://10.66.224.8:6000/api/history";
+const API_URL = buildApiUrl("/history");
 
 interface VerificationLog {
   _id: string;

@@ -22,7 +22,25 @@ export interface Student {
   feeBalance?: number;
   lecturerEvaluations?: {
     completed: boolean;
+    lastSubmittedAt?: string;
   };
+}
+
+export interface LecturerEvaluationPayload {
+  degreeProgramme: string;
+  yearOfStudy: "One" | "Two" | "Three" | "Four" | "Other";
+  currentSemester: string;
+  unitCode: string;
+  unitTitle: string;
+  lecturerName: string;
+  courseOutlineGiven: boolean;
+  cat1Administered: boolean;
+  cat2Administered: boolean;
+  cat1Returned: boolean;
+  cat2Returned: boolean;
+  lecturerAttendedAllLectures: boolean;
+  unitRelevantToDegree: boolean;
+  lecturerCoveredAllTopics: boolean;
 }
 
 export interface ExamCard {
@@ -114,6 +132,7 @@ export interface StudentAuthContextType {
   getCurrentExamCard: (studentId: string) => Promise<ExamCard | null>;
   getStudentExamCards: (studentId: string) => Promise<ExamCard[]>;
   getStudentProfile: (studentId: string) => Promise<Student>;
+  updateStudent: (payload: Partial<Student>) => Promise<void>;
 }
 
 export interface InvigilatorAuthContextType {

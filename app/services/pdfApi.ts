@@ -1,8 +1,9 @@
 // services/pdfApi.ts
 import axios, { AxiosResponse } from "axios";
 import * as FileSystem from "expo-file-system";
+import { buildApiUrl } from "../config/api";
 
-const API_URL = "http://10.66.224.8:6000/api/pdf"; // Updated base URL
+const API_URL = buildApiUrl("/pdf");
 
 // Types
 export interface PDFGenerationRequest {

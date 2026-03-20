@@ -1,8 +1,7 @@
 /* eslint-disable import/no-named-as-default-member */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-
-const API_URL = "http://10.66.224.8:6000/api";
+import { API_BASE_URL } from "../config/api";
 
 interface LoginResponse {
   token: string;
@@ -34,7 +33,7 @@ export const register = async (
   role: string = "Invigilator", // Make role optional with default
 ): Promise<RegisterResponse["user"]> => {
   try {
-    const response = await axios.post(`${API_URL}/users`, {
+    const response = await axios.post(`${API_BASE_URL}/users`, {
       userName,
       staffNo,
       email,
@@ -65,7 +64,7 @@ export const login = async (
   password: string,
 ): Promise<LoginResponse> => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, {
+    const response = await axios.post(`${API_BASE_URL}/auth/login`, {
       staffNo,
       password,
     });
@@ -94,7 +93,7 @@ export const login = async (
 
 export const verifyToken = async (token: string): Promise<boolean> => {
   try {
-    const response = await axios.post(`${API_URL}/verify-token`, null, {
+    const response = await axios.post(`${API_BASE_URL}/verify-token`, null, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.status === 200;
@@ -105,7 +104,7 @@ export const verifyToken = async (token: string): Promise<boolean> => {
 };
 
 export const forgotPassword = async (staffNo: string) => {
-  const response = await axios.post(`${API_URL}/auth/forgot-password`, {
+  const response = await axios.post(`${API_BASE_URL}/auth/forgot-password`, {
     staffNo,
   });
   return response.data;
@@ -121,7 +120,7 @@ export const updateProfile = async (
   },
 ) => {
   try {
-    const response = await axios.put(`${API_URL}/users/${userId}`, data, {
+    const response = await axios.put(`${API_BASE_URL}/users/${userId}`, data, {
       headers: {
         Authorization: `Bearer ${await AsyncStorage.getItem("authToken")}`,
       },
@@ -135,7 +134,7 @@ export const updateProfile = async (
 
 export const deleteAccount = async (userId: string) => {
   try {
-    const response = await axios.delete(`${API_URL}/users/${userId}`, {
+    const response = await axios.delete(`${API_BASE_URL}/users/${userId}`, {
       headers: {
         Authorization: `Bearer ${await AsyncStorage.getItem("authToken")}`,
       },

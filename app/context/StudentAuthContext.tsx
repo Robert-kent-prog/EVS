@@ -203,6 +203,17 @@ export const StudentAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return await api.getStudentProfile(studentId);
   };
 
+  const updateStudent = async (payload: Partial<Student>) => {
+    dispatch({ type: "UPDATE_STUDENT", payload });
+
+    if (!state.student) {
+      return;
+    }
+
+    const updatedStudent = { ...state.student, ...payload };
+    await AsyncStorage.setItem(STUDENT_DATA_KEY, JSON.stringify(updatedStudent));
+  };
+
   const contextValue: StudentAuthContextType = {
     student: state.student,
     isLoading: state.isLoading,
@@ -218,6 +229,7 @@ export const StudentAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     getCurrentExamCard,
     getStudentExamCards,
     getStudentProfile,
+    updateStudent,
   };
   
   return (

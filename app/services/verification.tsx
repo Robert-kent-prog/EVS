@@ -1,6 +1,7 @@
 import axios from "axios";
+import { buildApiUrl } from "../config/api";
 
-const API_URL = "http://10.66.224.8:6000/api/student";
+const API_URL = buildApiUrl("/student");
 
 interface VerificationResponse {
   studentId: string;

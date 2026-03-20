@@ -1,15 +1,15 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError, AxiosInstance } from "axios";
+import { API_BASE_URL } from "../config/api";
 import {
   EligibilityStatus,
   ExamCard,
   Invigilator,
   InvigilatorAuthResponse,
+  LecturerEvaluationPayload,
   Student,
   StudentAuthResponse,
 } from "../types";
-
-const BASE_URL = "http://10.66.224.8:6000/api";
 
 class ApiService {
   private api: AxiosInstance;
@@ -19,7 +19,7 @@ class ApiService {
   constructor() {
     // Main API instance
     this.api = axios.create({
-      baseURL: BASE_URL,
+      baseURL: API_BASE_URL,
       timeout: 10000,
       headers: {
         "Content-Type": "application/json",
@@ -28,7 +28,7 @@ class ApiService {
 
     // Student-specific API instance
     this.studentApi = axios.create({
-      baseURL: BASE_URL,
+      baseURL: API_BASE_URL,
       timeout: 10000,
       headers: {
         "Content-Type": "application/json",
@@ -37,7 +37,7 @@ class ApiService {
 
     // Invigilator-specific API instance
     this.invigilatorApi = axios.create({
-      baseURL: BASE_URL,
+      baseURL: API_BASE_URL,
       timeout: 10000,
       headers: {
         "Content-Type": "application/json",
@@ -51,7 +51,7 @@ class ApiService {
   }
 
   public getBaseUrl(): string {
-    return BASE_URL;
+    return API_BASE_URL;
   }
 
   private setupInterceptors(instance: AxiosInstance) {
@@ -425,6 +425,22 @@ class ApiService {
       console.error("Error deleting exam card:", error);
       throw error;
     }
+  }
+
+  async submitLecturerEvaluation(
+    payload: LecturerEvaluationPayload,
+  ): Promise<{ success: boolean; message: string; data?: any }> {
+    const response = await this.studentPost("/student/evaluations", payload);
+    return response.data;
+  }
+
+  async getLecturerEvaluationStatus(
+    studentId: string,
+  ): Promise<{ completed: boolean; lastSubmittedAt: string | null }> {
+    const response = await this.studentGet(
+      `/student/${studentId}/lecturer-evaluation-status`,
+    );
+    return response.data.data || response.data;
   }
 }
 

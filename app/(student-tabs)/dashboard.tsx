@@ -1,4 +1,5 @@
 import { MaterialIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import {
@@ -24,7 +25,6 @@ export default function StudentDashboard() {
   const [eligibility, setEligibility] = useState<EligibilityStatus | null>(null);
   const [loading, setLoading] = useState(false);
 
-
   const loadEligibility = useCallback(async () => {
     if (student) {
       try {
@@ -39,6 +39,12 @@ export default function StudentDashboard() {
   useEffect(() => {
     loadEligibility();
   }, [loadEligibility]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadEligibility();
+    }, [loadEligibility]),
+  );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -90,6 +96,10 @@ export default function StudentDashboard() {
     ]);
   };
 
+  const handleOpenEvaluation = () => {
+    router.push("/(student-tabs)/lecturer-evaluation");
+  };
+
   if (!student) {
     return (
       <View style={styles.loadingContainer}>
@@ -139,6 +149,26 @@ export default function StudentDashboard() {
           loading={loading}
           disabled={!checkExamCardEligibility(student).isEligible}
         />
+
+        {eligibility && !eligibility.evaluationsComplete && (
+          <View style={styles.evaluationCard}>
+            <View style={styles.evaluationHeader}>
+              <MaterialIcons name="rate-review" size={20} color="#8E44AD" />
+              <Text style={styles.evaluationTitle}>Lecturer Evaluation</Text>
+            </View>
+            <Text style={styles.evaluationDescription}>
+              Complete the lecturer evaluation form before generating your exam
+              card.
+            </Text>
+            <TouchableOpacity
+              style={styles.evaluationButton}
+              onPress={handleOpenEvaluation}
+            >
+              <MaterialIcons name="open-in-new" size={18} color="#fff" />
+              <Text style={styles.evaluationButtonText}>Evaluate Lecturer</Text>
+            </TouchableOpacity>
+          </View>
+        )}
 
       </ScrollView>
     </View>
@@ -192,6 +222,45 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     padding: 20,
+  },
+  evaluationCard: {
+    marginTop: 16,
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#E6D8F2",
+    padding: 16,
+  },
+  evaluationHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 8,
+  },
+  evaluationTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#2C3E50",
+  },
+  evaluationDescription: {
+    fontSize: 13,
+    color: "#5F6C7B",
+    marginBottom: 12,
+  },
+  evaluationButton: {
+    backgroundColor: "#8E44AD",
+    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  evaluationButtonText: {
+    color: "#fff",
+    fontWeight: "700",
+    fontSize: 14,
   },
   tabBar: {
     flexDirection: "row",
