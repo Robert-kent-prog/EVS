@@ -20,6 +20,12 @@ export interface Student {
   phoneNumber?: string;
   attendance?: number;
   feeBalance?: number;
+  attendanceTracking?: {
+    semesterStartDate?: string | null;
+    semesterWeeks?: number;
+    weeklyTimetable?: AttendanceTimetableEntry[];
+    attendanceSignatures?: AttendanceSignature[];
+  };
   lecturerEvaluations?: {
     completed: boolean;
     lastSubmittedAt?: string;
@@ -27,6 +33,66 @@ export interface Student {
     completedUnits?: number;
     evaluatedUnitCodes?: string[];
   };
+}
+
+export interface AttendanceTimetableEntry {
+  unitCode: string;
+  courseName: string;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string;
+}
+
+export interface AttendanceSignature {
+  unitCode: string;
+  courseName: string;
+  dayOfWeek: number;
+  classDate: string;
+  startTime: string;
+  endTime: string;
+  signedAt: string;
+  weekIndex: number;
+}
+
+export interface AttendanceMetrics {
+  hasTimetable: boolean;
+  semesterStartDate: string | null;
+  semesterWeeks: number;
+  elapsedWeeks: number;
+  expectedClosedSessions: number;
+  attendedSessions: number;
+  totalScheduledSessions: number;
+  attendancePercentage: number;
+}
+
+export interface AttendanceTodayClass extends AttendanceTimetableEntry {
+  classDate: string;
+  status: "pending" | "sign_open" | "signed" | "missed_locked" | "out_of_semester";
+  canSign: boolean;
+  weekIndex: number;
+  graceEndsAt: string;
+}
+
+export interface AttendanceOverview {
+  timetableConfig: {
+    semesterStartDate: string | null;
+    semesterWeeks: number;
+  };
+  weeklyTimetable: AttendanceTimetableEntry[];
+  metrics: AttendanceMetrics;
+  todayClasses: AttendanceTodayClass[];
+  registeredUnits: {
+    courseCode: string;
+    courseName: string;
+    isVerified: boolean;
+  }[];
+  hasRegisteredUnits: boolean;
+}
+
+export interface AttendanceTimetablePayload {
+  semesterStartDate: string;
+  semesterWeeks: number;
+  timetable: AttendanceTimetableEntry[];
 }
 
 export interface LecturerEvaluationPayload {

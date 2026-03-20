@@ -95,6 +95,10 @@ export default function StudentDashboard() {
     router.push("/(student-tabs)/lecturer-evaluations");
   };
 
+  const handleOpenProfile = () => {
+    router.push("../student-profile");
+  };
+
   if (!student) {
     return (
       <View style={styles.loadingContainer}>
@@ -115,9 +119,14 @@ export default function StudentDashboard() {
               {student.fullName}
             </Text>
           </View>
-          <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-            <MaterialIcons name="logout" size={24} color="#e74c3c" />
-          </TouchableOpacity>
+          <View style={styles.headerActions}>
+            <TouchableOpacity onPress={handleOpenProfile} style={styles.profileButton}>
+              <MaterialIcons name="person" size={22} color="#0B5FA5" />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+              <MaterialIcons name="logout" size={22} color="#e74c3c" />
+            </TouchableOpacity>
+          </View>
         </View>
         <View style={styles.studentInfo}>
           <Text style={styles.infoText}>
@@ -223,6 +232,18 @@ const styles = StyleSheet.create({
   },
   logoutButton: {
     padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#FFEDEE",
+  },
+  profileButton: {
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#EAF3FF",
+  },
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
   },
   studentInfo: {
     flexDirection: "row",

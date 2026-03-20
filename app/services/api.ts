@@ -2,6 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { API_BASE_URL } from "../config/api";
 import {
+  AttendanceOverview,
+  AttendanceTimetablePayload,
   EligibilityStatus,
   ExamCard,
   Invigilator,
@@ -155,6 +157,14 @@ class ApiService {
     config?: any,
   ): Promise<{ data: T }> {
     return this.studentApi.patch(url, data, config);
+  }
+
+  async studentPut<T = any>(
+    url: string,
+    data?: any,
+    config?: any,
+  ): Promise<{ data: T }> {
+    return this.studentApi.put(url, data, config);
   }
 
   // Invigilator-specific HTTP methods
@@ -455,6 +465,41 @@ class ApiService {
     hasRegisteredUnits: boolean;
   }> {
     const response = await this.studentGet("/student/evaluations");
+    return response.data.data || response.data;
+  }
+
+  async getAttendanceOverview(): Promise<AttendanceOverview> {
+    const response = await this.studentGet("/student/attendance/overview");
+    return response.data.data || response.data;
+  }
+
+  async updateAttendanceTimetable(
+    payload: AttendanceTimetablePayload,
+  ): Promise<{
+    timetableConfig: { semesterStartDate: string; semesterWeeks: number };
+    weeklyTimetable: AttendanceTimetablePayload["timetable"];
+    metrics: AttendanceOverview["metrics"];
+  }> {
+    const response = await this.studentPut("/student/attendance/timetable", payload);
+    return response.data.data || response.data;
+  }
+
+  async signClassAttendance(payload: {
+    unitCode: string;
+    startTime: string;
+  }): Promise<{
+    signature: {
+      classDate: string;
+      unitCode: string;
+      courseName: string;
+      startTime: string;
+      endTime: string;
+      signedAt: string;
+      weekIndex: number;
+    };
+    metrics: AttendanceOverview["metrics"];
+  }> {
+    const response = await this.studentPost("/student/attendance/sign", payload);
     return response.data.data || response.data;
   }
 }

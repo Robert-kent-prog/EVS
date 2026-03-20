@@ -65,9 +65,9 @@ export default function StudentTabLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: "Profile",
+          title: "Attendance",
           tabBarIcon: ({ color, size }) => (
-            <MaterialIcons name="person" size={size} color={color} />
+            <MaterialIcons name="event-note" size={size} color={color} />
           ),
         }}
       />
