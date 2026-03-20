@@ -1,4 +1,4 @@
-import { ApiResponse, EligibilityStatus, ExamCard } from "../types";
+import { ApiResponse, EligibilityStatus, ExamCard } from "../_types";
 import api from "./api";
 
 // Use EligibilityStatus from types instead of redeclaring

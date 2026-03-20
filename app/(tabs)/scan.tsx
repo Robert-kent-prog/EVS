@@ -14,16 +14,16 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import BarcodeScanner from "../components/BarcodeScanner";
-import { useAuth } from "../context/AuthContext";
+import BarcodeScanner from "../_components/BarcodeScanner";
+import { useAuth } from "../_context/AuthContext";
 import {
   clearStoredUnit,
   getStoredUnit,
   setStoredUnit,
   Unit,
-} from "../services/unit"; // Import unit services
-import { verifyByExamCard } from "../services/verification";
-import { invigilatorTheme } from "../theme/invigilatorTheme";
+} from "../_services/unit"; // Import unit services
+import { verifyByExamCard } from "../_services/verification";
+import { invigilatorTheme } from "../_theme/invigilatorTheme";
 
 export default function ScanScreen() {
   const [scanning, setScanning] = useState(false);

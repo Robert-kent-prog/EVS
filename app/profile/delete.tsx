@@ -12,9 +12,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../context/AuthContext";
-import { deleteAccount } from "../services/auth";
-import { invigilatorTheme } from "../theme/invigilatorTheme";
+import { useAuth } from "../_context/AuthContext";
+import { deleteAccount } from "../_services/auth";
+import { invigilatorTheme } from "../_theme/invigilatorTheme";
 
 export default function DeleteAccountScreen() {
   const { user, logout } = useAuth();

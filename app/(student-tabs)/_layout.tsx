@@ -2,7 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
 import { useEffect } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useStudentAuth } from "../context/StudentAuthContext";
+import { useStudentAuth } from "../_context/StudentAuthContext";
 
 export default function StudentTabLayout() {
   const { isAuthenticated, isLoading } = useStudentAuth();

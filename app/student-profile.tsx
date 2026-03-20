@@ -2,7 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useStudentAuth } from "./context/StudentAuthContext";
+import { useStudentAuth } from "./_context/StudentAuthContext";
 
 export default function StudentProfilePage() {
   const router = useRouter();

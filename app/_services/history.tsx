@@ -1,5 +1,5 @@
 import axios from "axios";
-import { buildApiUrl } from "../config/api";
+import { buildApiUrl } from "../_config/api";
 
 const API_URL = buildApiUrl("/history");
 

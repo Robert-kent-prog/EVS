@@ -13,15 +13,15 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "./context/AuthContext";
+import { useAuth } from "./_context/AuthContext";
 import {
   AttendanceRecord,
   clearAllRecords,
   getAllAttendanceRecords,
   getAttendanceStatistics,
-} from "./services/database";
-import { pdfApi } from "./services/pdfApi";
-import { getStoredUnit, Unit } from "./services/unit";
+} from "./_services/database";
+import { pdfApi } from "./_services/pdfApi";
+import { getStoredUnit, Unit } from "./_services/unit";
 
 export default function ReportsScreen() {
   const [attendanceRecords, setAttendanceRecords] = useState<

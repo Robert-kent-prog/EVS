@@ -1,7 +1,7 @@
 // services/pdfApi.ts
 import axios, { AxiosResponse } from "axios";
 import * as FileSystem from "expo-file-system";
-import { buildApiUrl } from "../config/api";
+import { buildApiUrl } from "../_config/api";
 
 const API_URL = buildApiUrl("/pdf");
 

@@ -2,7 +2,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { invigilatorTheme } from "../theme/invigilatorTheme";
+import { invigilatorTheme } from "../_theme/invigilatorTheme";
 
 export default function ProfileMenu() {
   const [visible, setVisible] = useState(false);

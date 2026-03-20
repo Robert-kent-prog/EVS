@@ -1,10 +1,10 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert } from "react-native";
-import AuthForm from "../components/AuthForm";
-import { useAuth } from "../context/AuthContext"; // For invigilator
-import { useStudentAuth } from "../context/StudentAuthContext"; // For student
-import api from "../services/api"; // Use your API service, not reset
+import AuthForm from "../_components/AuthForm";
+import { useAuth } from "../_context/AuthContext"; // For invigilator
+import { useStudentAuth } from "../_context/StudentAuthContext"; // For student
+import api from "../_services/api"; // Use your API service, not reset
 
 type UserRole = "Invigilator" | "Student";
 

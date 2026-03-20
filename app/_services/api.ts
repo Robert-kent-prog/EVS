@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError, AxiosInstance } from "axios";
-import { API_BASE_URL } from "../config/api";
+import { API_BASE_URL } from "../_config/api";
 import {
   AttendanceOverview,
   AttendanceTimetablePayload,
@@ -13,7 +13,7 @@ import {
   LecturerEvaluationStatus,
   Student,
   StudentAuthResponse,
-} from "../types";
+} from "../_types";
 
 class ApiService {
   private api: AxiosInstance;

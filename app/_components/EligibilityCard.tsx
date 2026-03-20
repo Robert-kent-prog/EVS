@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { EligibilityStatus } from "../types";
+import { EligibilityStatus } from "../_types";
 
 interface EligibilityCardProps {
   eligibility: EligibilityStatus | null;

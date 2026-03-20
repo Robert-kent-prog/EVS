@@ -1,7 +1,7 @@
-// app/context/StudentAuthContext.tsx
+// app/_context/StudentAuthContext.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useReducer } from "react";
-import api from "../services/api";
+import api from "../_services/api";
 import {
     EligibilityStatus,
     ExamCard,
@@ -9,7 +9,7 @@ import {
     StudentAuthAction,
     StudentAuthContextType,
     StudentAuthState,
-} from "../types";
+} from "../_types";
 
 const STUDENT_TOKEN_KEY = "studentToken";
 const STUDENT_DATA_KEY = "studentData";

@@ -1,4 +1,4 @@
-// app/types/index.ts
+// app/_types/index.ts
 export interface Student {
   _id?: string;
   studentId: string;
@@ -206,7 +206,7 @@ export interface EligibilityStatus {
   requiredEvaluationUnits?: number;
   message?: string;
 }
-// app/types/index.ts
+// app/_types/index.ts
 
 export interface StudentAuthContextType {
   student: Student | null;

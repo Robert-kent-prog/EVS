@@ -1,4 +1,4 @@
-import { Student } from "../types";
+import { Student } from "../_types";
 
 export interface EligibilityResult {
   isEligible: boolean;

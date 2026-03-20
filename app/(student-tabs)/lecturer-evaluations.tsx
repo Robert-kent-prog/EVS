@@ -13,9 +13,9 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useStudentAuth } from "../context/StudentAuthContext";
-import api from "../services/api";
-import { LecturerEvaluationRecord, LecturerEvaluationStatus } from "../types";
+import { useStudentAuth } from "../_context/StudentAuthContext";
+import api from "../_services/api";
+import { LecturerEvaluationRecord, LecturerEvaluationStatus } from "../_types";
 
 export default function LecturerEvaluationsTab() {
   const router = useRouter();

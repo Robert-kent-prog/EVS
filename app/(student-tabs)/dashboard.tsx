@@ -13,10 +13,10 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import EligibilityCard from "../components/EligibilityCard";
-import { useStudentAuth } from "../context/StudentAuthContext";
-import api from "../services/api";
-import { EligibilityStatus } from "../types";
+import EligibilityCard from "../_components/EligibilityCard";
+import { useStudentAuth } from "../_context/StudentAuthContext";
+import api from "../_services/api";
+import { EligibilityStatus } from "../_types";
 
 export default function StudentDashboard() {
   const { student, logout } = useStudentAuth();

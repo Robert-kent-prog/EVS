@@ -1,9 +1,9 @@
 import { Slot } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 import { QueryClient, QueryClientProvider } from "react-query";
-import { DatabaseProvider } from "./components/DatabaseProvider";
-import { AuthProvider, useAuth } from "./context/AuthContext";
-import { StudentAuthProvider } from "./context/StudentAuthContext";
+import { DatabaseProvider } from "./_components/DatabaseProvider";
+import { AuthProvider, useAuth } from "./_context/AuthContext";
+import { StudentAuthProvider } from "./_context/StudentAuthContext";
 
 const queryClient = new QueryClient();
 

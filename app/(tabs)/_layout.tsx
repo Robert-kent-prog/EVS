@@ -1,8 +1,8 @@
 import { FontAwesome5, MaterialIcons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "../context/AuthContext";
-import { invigilatorTheme } from "../theme/invigilatorTheme";
+import { useAuth } from "../_context/AuthContext";
+import { invigilatorTheme } from "../_theme/invigilatorTheme";
 
 export default function TabLayout() {
   const { user, loading } = useAuth();

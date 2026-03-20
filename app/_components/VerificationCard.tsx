@@ -1,7 +1,7 @@
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Href, Link } from "expo-router";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { invigilatorTheme } from "../theme/invigilatorTheme";
+import { invigilatorTheme } from "../_theme/invigilatorTheme";
 
 interface VerificationCardProps {
   title: string;

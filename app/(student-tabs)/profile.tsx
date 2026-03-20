@@ -14,8 +14,8 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import api from "../services/api";
-import { AttendanceOverview, AttendanceTimetableEntry } from "../types";
+import api from "../_services/api";
+import { AttendanceOverview, AttendanceTimetableEntry } from "../_types";
 
 const START_TIME_OPTIONS = ["07:00", "10:00", "13:00", "16:00"];
 const DAYS = [

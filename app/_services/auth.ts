@@ -1,7 +1,7 @@
 /* eslint-disable import/no-named-as-default-member */
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { API_BASE_URL } from "../config/api";
+import { API_BASE_URL } from "../_config/api";
 
 interface LoginResponse {
   token: string;

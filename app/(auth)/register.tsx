@@ -1,9 +1,9 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert } from "react-native";
-import AuthForm from "../components/AuthForm";
-import { useAuth } from "../context/AuthContext";
-import { login, register as registerInvigilator } from "../services/auth";
+import AuthForm from "../_components/AuthForm";
+import { useAuth } from "../_context/AuthContext";
+import { login, register as registerInvigilator } from "../_services/auth";
 
 type UserRole = "Invigilator" | "Student";
 

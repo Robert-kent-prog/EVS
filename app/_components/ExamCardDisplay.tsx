@@ -3,8 +3,8 @@ import { Image } from "expo-image";
 import React from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Barcode from "react-native-barcode-svg";
-import { shareExamCardFile } from "../services/examCardFile";
-import { ExamCard, Student } from "../types";
+import { shareExamCardFile } from "../_services/examCardFile";
+import { ExamCard, Student } from "../_types";
 
 interface ExamCardDisplayProps {
   examCard: ExamCard;

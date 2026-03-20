@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "react-query";
-import { invigilatorTheme } from "./theme/invigilatorTheme";
+import { invigilatorTheme } from "./_theme/invigilatorTheme";
 
 // Mock data - replace with your actual data structure
 const mockStudentDetails = {

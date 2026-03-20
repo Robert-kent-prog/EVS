@@ -15,9 +15,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "./context/AuthContext";
-import { verifyByStudentId } from "./services/verification";
-import { invigilatorTheme } from "./theme/invigilatorTheme";
+import { useAuth } from "./_context/AuthContext";
+import { verifyByStudentId } from "./_services/verification";
+import { invigilatorTheme } from "./_theme/invigilatorTheme";
 
 export default function ManualVerification() {
   const [regNumber, setRegNumber] = useState("");

@@ -12,8 +12,8 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 // Add to your existing imports
-import { storeAttendanceRecord } from "./services/database";
-import { invigilatorTheme } from "./theme/invigilatorTheme";
+import { storeAttendanceRecord } from "./_services/database";
+import { invigilatorTheme } from "./_theme/invigilatorTheme";
 
 // Define your student interface based on your API response
 interface Student {

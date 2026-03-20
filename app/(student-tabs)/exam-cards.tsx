@@ -12,15 +12,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import ExamCardDisplay from "../components/ExamCardDisplay";
-import { useStudentAuth } from "../context/StudentAuthContext";
-import api from "../services/api";
+import ExamCardDisplay from "../_components/ExamCardDisplay";
+import { useStudentAuth } from "../_context/StudentAuthContext";
+import api from "../_services/api";
 import {
   downloadExamCardFile,
   openExamCardInSystemViewer,
   shareExamCardFile,
-} from "../services/examCardFile";
-import { ExamCard } from "../types";
+} from "../_services/examCardFile";
+import { ExamCard } from "../_types";
 
 export default function ExamCardsScreen() {
   const { student } = useStudentAuth();

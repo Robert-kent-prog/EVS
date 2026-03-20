@@ -5,11 +5,11 @@ import { StatusBar } from "expo-status-bar";
 import { useCallback, useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import VerificationCard from "../components/VerificationCard";
-import { useAuth } from "../context/AuthContext";
+import VerificationCard from "../_components/VerificationCard";
+import { useAuth } from "../_context/AuthContext";
 import ProfileMenu from "../profile/ProfileMenu";
-import { getAttendanceStatistics } from "../services/database";
-import { invigilatorTheme } from "../theme/invigilatorTheme";
+import { getAttendanceStatistics } from "../_services/database";
+import { invigilatorTheme } from "../_theme/invigilatorTheme";
 
 export default function HomeScreen() {
   const { user, logout } = useAuth();

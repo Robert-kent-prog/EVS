@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, View, Text, TouchableOpacity } from "react-native";
-import { initializeDatabase } from "../services/database";
+import { initializeDatabase } from "../_services/database";
 
 interface DatabaseContextType {
   isInitialized: boolean;

@@ -13,9 +13,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useStudentAuth } from "../context/StudentAuthContext";
-import api from "../services/api";
-import { LecturerEvaluationPayload } from "../types";
+import { useStudentAuth } from "../_context/StudentAuthContext";
+import api from "../_services/api";
+import { LecturerEvaluationPayload } from "../_types";
 
 type YearOption = "One" | "Two" | "Three" | "Four" | "Other";
 

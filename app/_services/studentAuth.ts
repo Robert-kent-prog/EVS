@@ -1,4 +1,4 @@
-import { Student } from "../types";
+import { Student } from "../_types";
 import api from "./api"; // Now this will work with default export
 
 interface StudentLoginResponse {

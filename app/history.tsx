@@ -12,9 +12,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useQuery } from "react-query";
-import HistoryItem from "./components/HistoryItem";
-import { useAuth } from "./context/AuthContext";
-import { invigilatorTheme } from "./theme/invigilatorTheme";
+import HistoryItem from "./_components/HistoryItem";
+import { useAuth } from "./_context/AuthContext";
+import { invigilatorTheme } from "./_theme/invigilatorTheme";
 
 const mockVerificationHistory = [
   {
