@@ -310,7 +310,7 @@ export default function StudentDetails() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
+      <StatusBar style="dark" />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <LinearGradient

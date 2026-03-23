@@ -107,7 +107,6 @@ export default function VerificationResult() {
           };
 
           await storeAttendanceRecord(studentData, "exam_card");
-          console.log("Attendance recorded successfully with unit:", unitCode);
         } catch (err) {
           console.error("Failed to store attendance:", err);
         }
@@ -123,7 +122,7 @@ export default function VerificationResult() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
+      <StatusBar style="dark" />
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}

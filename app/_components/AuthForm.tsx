@@ -134,11 +134,7 @@ export default function AuthForm({
       style={styles.backgroundImage}
       resizeMode="cover"
     >
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor="#10241A"
-        translucent={false}
-      />
+      <StatusBar barStyle="dark-content" />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}

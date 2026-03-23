@@ -316,7 +316,7 @@ export default function ReportsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
+      <StatusBar style="dark" />
       {/* Statistics Header */}
       <View style={styles.statsContainer}>
         <Text style={styles.statsTitle}>Attendance Summary</Text>

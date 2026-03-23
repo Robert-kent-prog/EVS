@@ -11,10 +11,7 @@ export default function StudentProfilePage() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={studentTheme.colors.statusBar}
-      />
+      <StatusBar barStyle="dark-content" />
 
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>

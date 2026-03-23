@@ -143,7 +143,7 @@ export default function HistoryScreen() {
       style={styles.gradientContainer}
     >
       <SafeAreaView style={styles.container} edges={["top"]}>
-        <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
+        <StatusBar style="dark" />
         <View style={styles.header}>
           <Text style={styles.title}>Verification History</Text>
           <View style={styles.statsContainer}>

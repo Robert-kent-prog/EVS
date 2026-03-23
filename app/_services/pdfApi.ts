@@ -120,7 +120,6 @@ export class PDFApiService {
         throw new Error("Invalid report ID");
       }
 
-      // console.log("Attempting to download PDF with reportId:", reportId);
 
       const response: AxiosResponse<Blob> = await axios.get(
         `${API_URL}/download/${reportId}`,

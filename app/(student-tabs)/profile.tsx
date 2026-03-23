@@ -276,10 +276,7 @@ export default function StudentAttendanceScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={studentTheme.colors.statusBar}
-      />
+      <StatusBar barStyle="dark-content" />
       <ScrollView
         contentContainerStyle={[
           styles.content,

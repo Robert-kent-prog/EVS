@@ -117,10 +117,7 @@ export default function LecturerEvaluationsTab() {
 
   return (
       <View style={styles.container}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={studentTheme.colors.statusBar}
-      />
+      <StatusBar barStyle="dark-content" />
       <ScrollView
         contentContainerStyle={[
           styles.contentContainer,

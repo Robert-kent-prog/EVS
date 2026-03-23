@@ -59,7 +59,7 @@ export default function DeleteAccountScreen() {
   return (
     <LinearGradient colors={["#F8F9FF", "#EFF1FF"]} style={styles.gradientContainer}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
-      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
+      <StatusBar style="dark" />
       {/* Back Button */}
       <Pressable style={styles.backButton} onPress={() => router.back()}>
         <AntDesign name="close" size={28} color="#F44336" />

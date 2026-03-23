@@ -69,7 +69,6 @@ export const login = async (
       password,
     });
 
-    // console.log("Full API response:", response.data); // Debug log
 
     if (!response.data.accessToken || !response.data.user?._id) {
       throw new Error("Login failed - invalid response format");

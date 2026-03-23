@@ -38,7 +38,7 @@ export default function HomeScreen() {
       colors={["#F8F9FF", "#EFF1FF"]}
       style={styles.gradientContainer}
     >
-      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
+      <StatusBar style="dark" />
       <SafeAreaView style={styles.container} edges={["top"]}>
         {/* Header Section */}
         <View style={styles.header}>

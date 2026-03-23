@@ -6,8 +6,13 @@
     "orientation": "portrait",
     "icon": "./assets/images/EVS.png",
     "scheme": "evs",
-    "userInterfaceStyle": "automatic",
+    "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#E8F5EE"
+    },
     "ios": {
       "supportsTablet": true,
       "infoPlist": {
@@ -20,7 +25,7 @@
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/EVS.png",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#E8F5EE"
       },
       "edgeToEdgeEnabled": false,
       "permissions": [
@@ -33,13 +38,13 @@
       "package": "com.user_name123.EVS"
     },
     "androidStatusBar": {
-      "backgroundColor": "#10241A",
-      "barStyle": "light-content",
+      "backgroundColor": "#E8F5EE",
+      "barStyle": "dark-content",
       "translucent": false
     },
     "androidNavigationBar": {
-      "backgroundColor": "#10241A",
-      "barStyle": "light-content"
+      "backgroundColor": "#E8F5EE",
+      "barStyle": "dark-content"
     },
     "web": {
       "bundler": "metro",
@@ -48,15 +53,6 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#10241A"
-        }
-      ],
       [
         "expo-image-picker",
         {
@@ -70,6 +66,15 @@
           "photosPermission": "Allow EVS to access your photos.",
           "savePhotosPermission": "Allow EVS to save photos.",
           "isAccessMediaLocationEnabled": true
+        }
+      ],
+      [
+        "expo-navigation-bar",
+        {
+          "position": "relative",
+          "backgroundColor": "#E8F5EE",
+          "barStyle": "dark",
+          "borderColor": "#E8F5EE"
         }
       ],
       "expo-secure-store",

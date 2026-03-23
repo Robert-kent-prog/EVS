@@ -185,10 +185,7 @@ export default function LecturerEvaluationScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={studentTheme.colors.statusBar}
-      />
+      <StatusBar barStyle="dark-content" />
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity

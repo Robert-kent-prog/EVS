@@ -247,10 +247,7 @@ export default function ExamCardsScreen() {
 
   return (
     <View style={styles.container}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={studentTheme.colors.statusBar}
-      />
+      <StatusBar barStyle="dark-content" />
       <View style={[styles.header, { paddingTop: Math.max(insets.top + 14, 56) }]}>
         <Text style={styles.headerTitle}>My Exam Cards</Text>
         <Text style={styles.headerSubtitle}>Download, share, or delete your cards</Text>

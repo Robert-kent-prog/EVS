@@ -110,10 +110,7 @@ export default function StudentDashboard() {
 
   return (
     <View style={styles.container}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={studentTheme.colors.statusBar}
-      />
+      <StatusBar barStyle="dark-content" />
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>

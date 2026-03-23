@@ -310,7 +310,6 @@ export async function clearAllRecords(): Promise<void> {
     }
 
     await db.runAsync("DELETE FROM attendance_records");
-    // console.log("All records cleared");
   } catch (error) {
     console.error("Error clearing records:", error);
     throw error;
