@@ -22,7 +22,7 @@
         "foregroundImage": "./assets/images/EVS.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
+      "edgeToEdgeEnabled": false,
       "permissions": [
         "android.permission.RECORD_AUDIO",
         "android.permission.READ_EXTERNAL_STORAGE",
@@ -31,6 +31,15 @@
         "android.permission.DOWNLOAD_WITHOUT_NOTIFICATION"
       ],
       "package": "com.user_name123.EVS"
+    },
+    "androidStatusBar": {
+      "backgroundColor": "#10241A",
+      "barStyle": "light-content",
+      "translucent": false
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#10241A",
+      "barStyle": "light-content"
     },
     "web": {
       "bundler": "metro",
@@ -45,7 +54,7 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#10241A"
         }
       ],
       [

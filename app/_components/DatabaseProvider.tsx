@@ -57,7 +57,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
   if (!isInitialized && !error) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color="#0066cc" />
+        <ActivityIndicator size="large" color="#00713D" />
       </View>
     );
   }
@@ -80,7 +80,7 @@ export function DatabaseProvider({ children }: { children: React.ReactNode }) {
           style={{
             marginTop: 20,
             padding: 10,
-            backgroundColor: "#0066cc",
+            backgroundColor: "#00713D",
             borderRadius: 5,
           }}
           onPress={retryInitialization}

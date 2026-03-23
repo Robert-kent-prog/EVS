@@ -116,7 +116,7 @@ export default function HistoryScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#6E3BFF" />
+        <ActivityIndicator size="large" color="#00713D" />
         <Text style={styles.loadingText}>Loading verification history...</Text>
       </View>
     );
@@ -143,7 +143,7 @@ export default function HistoryScreen() {
       style={styles.gradientContainer}
     >
       <SafeAreaView style={styles.container} edges={["top"]}>
-        <StatusBar style="dark" />
+        <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
         <View style={styles.header}>
           <Text style={styles.title}>Verification History</Text>
           <View style={styles.statsContainer}>
@@ -190,8 +190,8 @@ export default function HistoryScreen() {
             <RefreshControl
               refreshing={isLoading}
               onRefresh={onRefresh}
-              colors={["#6E3BFF"]}
-              tintColor="#6E3BFF"
+              colors={["#00713D"]}
+              tintColor="#00713D"
             />
           }
           showsVerticalScrollIndicator={false}

@@ -123,14 +123,14 @@ export default function VerificationResult() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
       <ScrollView
         style={styles.scrollView}
         showsVerticalScrollIndicator={false}
       >
         {/* Header Section */}
         <LinearGradient
-          colors={isSuccess ? ["#0066cc", "#1a7be6"] : ["#F44336", "#FF5252"]}
+          colors={isSuccess ? ["#00713D", "#0A8E4A"] : ["#F44336", "#FF5252"]}
           style={styles.header}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -169,7 +169,7 @@ export default function VerificationResult() {
               {/* Basic Info Card */}
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
-                  <MaterialIcons name="info" size={20} color="#6E3BFF" />
+                  <MaterialIcons name="info" size={20} color="#00713D" />
                   <Text style={styles.cardTitle}>Student Information</Text>
                 </View>
 
@@ -232,7 +232,7 @@ export default function VerificationResult() {
               {/* Courses Card */}
               <View style={styles.card}>
                 <View style={styles.cardHeader}>
-                  <MaterialIcons name="menu-book" size={20} color="#6E3BFF" />
+                  <MaterialIcons name="menu-book" size={20} color="#00713D" />
                   <Text style={styles.cardTitle}>
                     {unitCode ? `Unit: ${unitCode}` : "Registered Units"}
                   </Text>
@@ -243,7 +243,7 @@ export default function VerificationResult() {
 
                 {unitCode && (
                   <View style={styles.unitInfoBadge}>
-                    <MaterialIcons name="class" size={16} color="#6E3BFF" />
+                    <MaterialIcons name="class" size={16} color="#00713D" />
                     <Text style={styles.unitInfoText}>
                       Showing only: {unitCode} - {unitName || unitCode}
                     </Text>

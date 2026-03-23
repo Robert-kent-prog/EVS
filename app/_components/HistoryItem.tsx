@@ -23,7 +23,7 @@ export default function HistoryItem({ item }: HistoryItemProps) {
         <LinearGradient
           colors={
             item.verificationMethod === "barcode"
-              ? ["#6E3BFF", "#8D5EF2"]
+              ? ["#00713D", "#0A8E4A"]
               : ["#FF6B6B", "#FF8E8E"]
           }
           style={styles.methodIndicator}

@@ -82,7 +82,7 @@ export default function ManualVerification() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
       <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}

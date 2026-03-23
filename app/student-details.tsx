@@ -310,11 +310,11 @@ export default function StudentDetails() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
         {/* Header Section */}
         <LinearGradient
-          colors={["#0066cc", "#1a7be6"]}
+          colors={["#00713D", "#0A8E4A"]}
           style={styles.header}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
@@ -336,7 +336,7 @@ export default function StudentDetails() {
         {/* Basic Info Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <MaterialIcons name="info" size={20} color="#6E3BFF" />
+            <MaterialIcons name="info" size={20} color="#00713D" />
             <Text style={styles.cardTitle}>Basic Information</Text>
           </View>
 
@@ -380,7 +380,7 @@ export default function StudentDetails() {
         {/* Courses Card */}
         <View style={styles.card}>
           <View style={styles.cardHeader}>
-            <MaterialIcons name="menu-book" size={20} color="#6E3BFF" />
+            <MaterialIcons name="menu-book" size={20} color="#00713D" />
             <Text style={styles.cardTitle}>Registered Courses</Text>
             <Text style={styles.courseCount}>
               {student.registeredCourses.length} courses
@@ -445,7 +445,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    shadowColor: "#6E3BFF",
+    shadowColor: "#00713D",
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.2,
     shadowRadius: 20,
@@ -509,7 +509,7 @@ const styles = StyleSheet.create({
   courseCount: {
     marginLeft: "auto",
     backgroundColor: "#F0E7FF",
-    color: "#6E3BFF",
+    color: "#00713D",
     paddingHorizontal: 10,
     paddingVertical: 3,
     borderRadius: 12,
@@ -550,7 +550,7 @@ const styles = StyleSheet.create({
   },
   courseCode: {
     fontWeight: "bold",
-    color: "#6E3BFF",
+    color: "#00713D",
     fontSize: 16,
   },
   courseDetails: {

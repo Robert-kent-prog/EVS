@@ -1,8 +1,8 @@
 export const invigilatorTheme = {
   colors: {
-    primary: "#0066cc",
-    primaryDark: "#004f9e",
-    primarySoft: "#eaf3ff",
+    primary: "#00713D",
+    primaryDark: "#005A31",
+    primarySoft: "#E8F5EE",
     surface: "#ffffff",
     bg: "#f7f9fc",
     text: "#1f2d3d",

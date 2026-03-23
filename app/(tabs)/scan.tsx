@@ -166,7 +166,7 @@ export default function ScanScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
       {/* Unit Section */}
       <View style={styles.unitSection}>
         <View style={styles.unitHeader}>
@@ -175,7 +175,7 @@ export default function ScanScreen() {
             <MaterialIcons
               name={isEditing ? "cancel" : "edit"}
               size={24}
-              color="#0066cc"
+              color="#00713D"
             />
           </TouchableOpacity>
         </View>
@@ -263,13 +263,13 @@ export default function ScanScreen() {
       ) : (
         <View style={styles.placeholder}>
           {loading ? (
-            <ActivityIndicator size="large" color="#0066cc" />
+            <ActivityIndicator size="large" color="#00713D" />
           ) : (
             <>
               <MaterialIcons
                 name="qr-code-scanner"
                 size={120}
-                color="#0066cc"
+                color="#00713D"
                 style={styles.icon}
               />
               <Text style={styles.placeholderText}>
@@ -279,7 +279,7 @@ export default function ScanScreen() {
               </Text>
               {currentUnit ? (
                 <View style={styles.currentUnitBanner}>
-                  <MaterialIcons name="info" size={16} color="#0066cc" />
+                  <MaterialIcons name="info" size={16} color="#00713D" />
                   <Text style={styles.currentUnitText}>
                     Scanning for: {currentUnit.code} - {currentUnit.name}
                   </Text>
@@ -341,7 +341,7 @@ export default function ScanScreen() {
 
             {currentUnit && (
               <View style={styles.unitBadge}>
-                <MaterialIcons name="class" size={16} color="#0066cc" />
+                <MaterialIcons name="class" size={16} color="#00713D" />
                 <Text style={styles.unitBadgeText}>
                   Unit: {currentUnit.code}
                 </Text>
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 5,
   },
   updateButton: {
-    backgroundColor: "#0066cc",
+    backgroundColor: "#00713D",
   },
   clearButton: {
     backgroundColor: "#cc3300",
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     marginTop: 10,
     padding: 8,
-    backgroundColor: "#f0f8ff",
+    backgroundColor: "#F2FBF6",
     borderRadius: 5,
   },
   unitWarning: {
@@ -501,13 +501,13 @@ const styles = StyleSheet.create({
   currentUnitBanner: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#e6f2ff",
+    backgroundColor: "#E8F5EE",
     padding: 10,
     borderRadius: 8,
     marginTop: 10,
   },
   currentUnitText: {
-    color: "#0066cc",
+    color: "#00713D",
     marginLeft: 8,
     fontWeight: "500",
   },
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   startButton: {
-    backgroundColor: "#0066cc",
+    backgroundColor: "#00713D",
   },
   stopButton: {
     backgroundColor: "#cc3300",
@@ -581,13 +581,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#e6f2ff",
+    backgroundColor: "#E8F5EE",
     padding: 8,
     borderRadius: 8,
     marginBottom: 20,
   },
   unitBadgeText: {
-    color: "#0066cc",
+    color: "#00713D",
     fontWeight: "500",
     marginLeft: 5,
   },

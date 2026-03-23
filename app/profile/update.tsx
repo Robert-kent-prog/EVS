@@ -56,7 +56,7 @@ export default function UpdateProfileScreen() {
   return (
     <LinearGradient colors={["#F8F9FF", "#EFF1FF"]} style={styles.gradientContainer}>
       <SafeAreaView style={{ flex: 1 }} edges={["top"]}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
       {/* Back Button */}
       <Pressable style={styles.backButton} onPress={() => router.back()}>
         <AntDesign name="arrowleft" size={24} color={invigilatorTheme.colors.primary} />
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
     borderRadius: 50,
   },
   backButtonText: {
-    color: "#6E3BFF",
+    color: "#00713D",
     marginLeft: 5,
     fontSize: 16,
     fontWeight: "500",

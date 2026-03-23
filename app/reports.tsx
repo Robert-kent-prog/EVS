@@ -308,7 +308,7 @@ export default function ReportsScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <MaterialIcons name="history" size={60} color="#0066cc" />
+        <MaterialIcons name="history" size={60} color="#00713D" />
         <Text style={styles.loadingText}>Loading attendance data...</Text>
       </View>
     );
@@ -316,7 +316,7 @@ export default function ReportsScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top"]}>
-      <StatusBar style="dark" />
+      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
       {/* Statistics Header */}
       <View style={styles.statsContainer}>
         <Text style={styles.statsTitle}>Attendance Summary</Text>
@@ -437,7 +437,7 @@ export default function ReportsScreen() {
       {pdfLoading && (
         <View style={styles.overlay}>
           <View style={styles.overlayContent}>
-            <ActivityIndicator size="large" color="#0066cc" />
+            <ActivityIndicator size="large" color="#00713D" />
             <Text style={styles.overlayText}>Processing PDF...</Text>
             <Text style={styles.overlaySubtext}>This may take a moment</Text>
           </View>
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
   },
   currentUnitText: {
     fontSize: 13,
-    color: "#0066cc",
+    color: "#00713D",
     marginBottom: 12,
     fontWeight: "600",
   },
@@ -537,7 +537,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   exportButton: {
-    backgroundColor: "#1976D2",
+    backgroundColor: "#00713D",
   },
   clearButton: {
     backgroundColor: "#D32F2F",

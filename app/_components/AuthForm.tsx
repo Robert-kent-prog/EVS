@@ -8,6 +8,7 @@ import {
   Platform,
   Pressable,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInput,
@@ -133,6 +134,11 @@ export default function AuthForm({
       style={styles.backgroundImage}
       resizeMode="cover"
     >
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor="#10241A"
+        translucent={false}
+      />
       <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
@@ -410,8 +416,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   roleButtonActive: {
-    backgroundColor: "#3498db",
-    borderColor: "#3498db",
+    backgroundColor: "#00713D",
+    borderColor: "#00713D",
   },
   roleButtonText: {
     marginLeft: 8,
@@ -447,7 +453,7 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   button: {
-    backgroundColor: "#3498db",
+    backgroundColor: "#00713D",
     padding: 15,
     borderRadius: 10,
     alignItems: "center",
@@ -478,7 +484,7 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   footerLink: {
-    color: "#3498db",
+    color: "#00713D",
     fontWeight: "800",
     fontSize: 15,
   },
@@ -490,7 +496,7 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   forgotPasswordText: {
-    color: "#3498db",
+    color: "#00713D",
     fontSize: 14,
     fontWeight: "700",
   },

@@ -25,7 +25,7 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
   if (!permission) {
     return (
       <View style={styles.container}>
-        <ActivityIndicator size="large" color="#4B7BE5" />
+        <ActivityIndicator size="large" color="#00713D" />
       </View>
     );
   }
@@ -111,19 +111,19 @@ const BarcodeScanner: React.FC<BarcodeScannerProps> = ({
       <View style={styles.instructions}>
         <Text style={styles.instructionsTitle}>Scanning Instructions:</Text>
         <View style={styles.instructionItem}>
-          <MaterialIcons name="check-circle" size={16} color="#4B7BE5" />
+          <MaterialIcons name="check-circle" size={16} color="#00713D" />
           <Text style={styles.instructionText}>
             Position barcode within the frame
           </Text>
         </View>
         <View style={styles.instructionItem}>
-          <MaterialIcons name="check-circle" size={16} color="#4B7BE5" />
+          <MaterialIcons name="check-circle" size={16} color="#00713D" />
           <Text style={styles.instructionText}>
             Hold steady for clear capture
           </Text>
         </View>
         <View style={styles.instructionItem}>
-          <MaterialIcons name="check-circle" size={16} color="#4B7BE5" />
+          <MaterialIcons name="check-circle" size={16} color="#00713D" />
           <Text style={styles.instructionText}>
             Ensure good lighting conditions
           </Text>
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   permissionButton: {
-    backgroundColor: "#4B7BE5",
+    backgroundColor: "#00713D",
     padding: 15,
     borderRadius: 8,
     marginTop: 20,
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#4B7BE5",
+    backgroundColor: "#00713D",
     padding: 15,
     borderRadius: 8,
     width: "60%",

@@ -15,8 +15,7 @@ export const studentTheme = {
     info: "#2563EB",
     tabInactive: "#7F8C8D",
     onPrimary: "#FFFFFF",
-    statusBar: "#00713D",
-    navBar: "#00713D",
+    statusBar: "#10241A",
+    navBar: "#10241A",
   },
 };
-

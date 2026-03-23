@@ -38,7 +38,7 @@ export default function HomeScreen() {
       colors={["#F8F9FF", "#EFF1FF"]}
       style={styles.gradientContainer}
     >
-      <StatusBar style="dark" />
+      <StatusBar style="light" backgroundColor="#10241A" translucent={false} />
       <SafeAreaView style={styles.container} edges={["top"]}>
         {/* Header Section */}
         <View style={styles.header}>
@@ -61,14 +61,14 @@ export default function HomeScreen() {
             description="Verify student exam eligibility by scanning their barcode/QR code"
             icon="qrcode" // Correct MaterialIcons name
             route="./scan"
-            colors={["#0066cc", "#1a7be6"]}
+            colors={["#00713D", "#0A8E4A"]}
           />
           <VerificationCard
             title="Reports Generation"
             description="View attendance reports and statistics"
             icon="qrcode"
             route="../reports"
-            colors={["#0066cc", "#1a7be6"]}
+            colors={["#00713D", "#0A8E4A"]}
           />
 
           {/* Stats Section */}

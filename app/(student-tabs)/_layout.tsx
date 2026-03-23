@@ -1,8 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Tabs, useRouter } from "expo-router";
-import * as NavigationBar from "expo-navigation-bar";
 import { useEffect } from "react";
-import { Platform } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useStudentAuth } from "../_context/StudentAuthContext";
 import { studentTheme } from "../_theme/studentTheme";
@@ -17,14 +15,6 @@ export default function StudentTabLayout() {
       router.replace("/(auth)/login");
     }
   }, [isAuthenticated, isLoading]);
-
-  useEffect(() => {
-    if (Platform.OS !== "android") return;
-
-    NavigationBar.setBackgroundColorAsync(studentTheme.colors.navBar).catch(() => {});
-    NavigationBar.setBorderColorAsync(studentTheme.colors.navBar).catch(() => {});
-    NavigationBar.setButtonStyleAsync("light").catch(() => {});
-  }, []);
 
   return (
     <Tabs

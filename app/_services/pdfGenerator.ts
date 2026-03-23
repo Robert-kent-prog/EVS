@@ -202,7 +202,7 @@ export async function generateAttendancePDF(
             }
             .bar-fill {
               height: 100%;
-              background-color: #1976D2;
+              background-color: #00713D;
             }
             .bar-count {
               width: 40px;
