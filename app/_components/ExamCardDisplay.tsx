@@ -4,6 +4,7 @@ import React from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Barcode from "react-native-barcode-svg";
 import { shareExamCardFile } from "../_services/examCardFile";
+import { studentTheme } from "../_theme/studentTheme";
 import { ExamCard, Student } from "../_types";
 
 interface ExamCardDisplayProps {
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
   },
   separator: {
     height: 2,
-    backgroundColor: '#0066cc',
+    backgroundColor: studentTheme.colors.primary,
     marginBottom: 20,
     width: '100%',
   },
@@ -232,7 +233,7 @@ const styles = StyleSheet.create({
   unitsTitle: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "#0066cc",
+    color: studentTheme.colors.primary,
     marginBottom: 10,
     letterSpacing: 1,
   },
@@ -308,13 +309,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#0066cc",
+    backgroundColor: studentTheme.colors.primary,
     padding: 12,
     borderRadius: 8,
     gap: 8,
   },
   shareButton: {
-    backgroundColor: "#4CAF50",
+    backgroundColor: studentTheme.colors.primaryDark,
   },
   actionButtonText: {
     color: "white",

@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { studentTheme } from "../_theme/studentTheme";
 import { EligibilityStatus } from "../_types";
 
 interface EligibilityCardProps {
@@ -16,7 +17,8 @@ interface EligibilityCardProps {
   disabled?: boolean;
 }
 
-const getStatusColor = (status: boolean) => (status ? "#4CAF50" : "#F44336");
+const getStatusColor = (status: boolean) =>
+  status ? studentTheme.colors.success : studentTheme.colors.danger;
 const getStatusIcon = (status: boolean) =>
   status ? "check-circle" : "cancel";
 
@@ -31,7 +33,10 @@ const EligibilityCard: React.FC<EligibilityCardProps> = ({
       <View style={styles.container}>
         <Text style={styles.title}>Eligibility Status</Text>
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#27ae60" />
+          <ActivityIndicator
+            size="large"
+            color={studentTheme.colors.primary}
+          />
           <Text style={styles.loadingText}>Loading eligibility status...</Text>
         </View>
       </View>
@@ -163,7 +168,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#2c3e50",
+    color: studentTheme.colors.text,
     marginBottom: 14,
   },
   specContainer: {
@@ -176,7 +181,7 @@ const styles = StyleSheet.create({
   specTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#2c3e50",
+    color: studentTheme.colors.text,
     marginBottom: 8,
   },
   specRow: {
@@ -262,14 +267,14 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#27ae60",
+    backgroundColor: studentTheme.colors.primary,
     padding: 15,
     borderRadius: 10,
     marginTop: 14,
     gap: 10,
   },
   generateButtonDisabled: {
-    backgroundColor: "#bdc3c7",
+    backgroundColor: "#AEB8C2",
   },
   generateButtonText: {
     color: "#fff",

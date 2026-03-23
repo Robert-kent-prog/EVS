@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import EligibilityCard from "../_components/EligibilityCard";
 import { useStudentAuth } from "../_context/StudentAuthContext";
 import api from "../_services/api";
+import { studentTheme } from "../_theme/studentTheme";
 import { EligibilityStatus } from "../_types";
 
 export default function StudentDashboard() {
@@ -109,7 +110,10 @@ export default function StudentDashboard() {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={studentTheme.colors.statusBar}
+      />
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
@@ -121,10 +125,18 @@ export default function StudentDashboard() {
           </View>
           <View style={styles.headerActions}>
             <TouchableOpacity onPress={handleOpenProfile} style={styles.profileButton}>
-              <MaterialIcons name="person" size={22} color="#0B5FA5" />
+              <MaterialIcons
+                name="person"
+                size={22}
+                color={studentTheme.colors.primary}
+              />
             </TouchableOpacity>
             <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
-              <MaterialIcons name="logout" size={22} color="#e74c3c" />
+              <MaterialIcons
+                name="logout"
+                size={22}
+                color={studentTheme.colors.danger}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -175,7 +187,11 @@ export default function StudentDashboard() {
           !eligibility.evaluationsComplete && (
           <View style={styles.evaluationCard}>
             <View style={styles.evaluationHeader}>
-              <MaterialIcons name="rate-review" size={20} color="#8E44AD" />
+              <MaterialIcons
+                name="rate-review"
+                size={20}
+                color={studentTheme.colors.primary}
+              />
               <Text style={styles.evaluationTitle}>Lecturer Evaluation</Text>
             </View>
             <Text style={styles.evaluationDescription}>
@@ -200,7 +216,7 @@ export default function StudentDashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f6fa",
+    backgroundColor: studentTheme.colors.bg,
   },
   loadingContainer: {
     flex: 1,
@@ -208,12 +224,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   header: {
-    backgroundColor: "#fff",
+    backgroundColor: studentTheme.colors.surface,
     paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 20,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: studentTheme.colors.border,
   },
   headerTop: {
     flexDirection: "row",
@@ -238,7 +254,7 @@ const styles = StyleSheet.create({
   profileButton: {
     padding: 10,
     borderRadius: 10,
-    backgroundColor: "#EAF3FF",
+    backgroundColor: studentTheme.colors.primarySoft,
   },
   headerActions: {
     flexDirection: "row",
@@ -259,10 +275,10 @@ const styles = StyleSheet.create({
   },
   evaluationCard: {
     marginTop: 16,
-    backgroundColor: "#fff",
+    backgroundColor: studentTheme.colors.surface,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: "#E6D8F2",
+    borderColor: "#CFE6D9",
     padding: 16,
   },
   evaluationHeader: {
@@ -282,7 +298,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   evaluationButton: {
-    backgroundColor: "#8E44AD",
+    backgroundColor: studentTheme.colors.primary,
     borderRadius: 10,
     paddingVertical: 12,
     paddingHorizontal: 14,
@@ -298,10 +314,10 @@ const styles = StyleSheet.create({
   },
   tabBar: {
     flexDirection: "row",
-    backgroundColor: "#fff",
+    backgroundColor: studentTheme.colors.surface,
     paddingVertical: 10,
     borderTopWidth: 1,
-    borderTopColor: "#e0e0e0",
+    borderTopColor: studentTheme.colors.border,
   },
   tabItem: {
     flex: 1,
@@ -313,6 +329,6 @@ const styles = StyleSheet.create({
     color: "#7f8c8d",
   },
   tabLabelActive: {
-    color: "#27ae60",
+    color: studentTheme.colors.primary,
   },
 });

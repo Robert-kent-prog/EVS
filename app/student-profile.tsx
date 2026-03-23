@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useStudentAuth } from "./_context/StudentAuthContext";
+import { studentTheme } from "./_theme/studentTheme";
 
 export default function StudentProfilePage() {
   const router = useRouter();
@@ -10,11 +11,18 @@ export default function StudentProfilePage() {
 
   return (
     <SafeAreaView style={styles.container} edges={["top", "bottom"]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F6F8FB" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={studentTheme.colors.statusBar}
+      />
 
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-          <MaterialIcons name="arrow-back" size={22} color="#1F2D3D" />
+          <MaterialIcons
+            name="arrow-back"
+            size={22}
+            color={studentTheme.colors.primary}
+          />
         </TouchableOpacity>
         <Text style={styles.title}>Student Profile</Text>
       </View>
@@ -47,7 +55,11 @@ export default function StudentProfilePage() {
         </View>
 
         <View style={styles.noteCard}>
-          <MaterialIcons name="lock" size={18} color="#0B5FA5" />
+          <MaterialIcons
+            name="lock"
+            size={18}
+            color={studentTheme.colors.primary}
+          />
           <Text style={styles.noteText}>
             Profile details are read-only for students.
           </Text>
@@ -68,7 +80,7 @@ function InfoRow({
 }) {
   return (
     <View style={styles.infoRow}>
-      <MaterialIcons name={icon} size={18} color="#64748B" />
+      <MaterialIcons name={icon} size={18} color={studentTheme.colors.subtext} />
       <View style={styles.infoTextWrap}>
         <Text style={styles.infoLabel}>{label}</Text>
         <Text style={styles.infoValue}>{value}</Text>
@@ -80,7 +92,7 @@ function InfoRow({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F6F8FB",
+    backgroundColor: studentTheme.colors.bg,
   },
   header: {
     flexDirection: "row",
@@ -97,7 +109,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#EEF2F6",
+    backgroundColor: studentTheme.colors.primarySoft,
   },
   title: {
     marginLeft: 12,
@@ -124,7 +136,7 @@ const styles = StyleSheet.create({
     borderRadius: 34,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#0B5FA5",
+    backgroundColor: studentTheme.colors.primary,
   },
   avatarText: {
     color: "#FFFFFF",
@@ -178,19 +190,18 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   noteCard: {
-    backgroundColor: "#EAF3FF",
+    backgroundColor: studentTheme.colors.primarySoft,
     borderRadius: 10,
     padding: 12,
     flexDirection: "row",
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#C7DFFF",
+    borderColor: "#CFE6D9",
   },
   noteText: {
     marginLeft: 8,
-    color: "#0F3D72",
+    color: studentTheme.colors.primaryDark,
     fontSize: 13,
     fontWeight: "600",
   },
 });
-

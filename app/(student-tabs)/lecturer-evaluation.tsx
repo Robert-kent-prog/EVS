@@ -15,6 +15,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useStudentAuth } from "../_context/StudentAuthContext";
 import api from "../_services/api";
+import { studentTheme } from "../_theme/studentTheme";
 import { LecturerEvaluationPayload } from "../_types";
 
 type YearOption = "One" | "Two" | "Three" | "Four" | "Other";
@@ -184,7 +185,10 @@ export default function LecturerEvaluationScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={["top", "bottom"]}>
-      <StatusBar barStyle="dark-content" backgroundColor="#f7f9fc" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={studentTheme.colors.statusBar}
+      />
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <TouchableOpacity
@@ -192,7 +196,11 @@ export default function LecturerEvaluationScreen() {
             style={styles.backButton}
             disabled={submitting}
           >
-            <MaterialIcons name="arrow-back" size={22} color="#1F2D3D" />
+            <MaterialIcons
+              name="arrow-back"
+              size={22}
+              color={studentTheme.colors.primary}
+            />
           </TouchableOpacity>
           <Image
             source={require("../../assets/school_logo.jpeg")}
@@ -350,7 +358,7 @@ export default function LecturerEvaluationScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: "#f7f9fc",
+    backgroundColor: studentTheme.colors.bg,
   },
   container: {
     padding: 16,
@@ -370,7 +378,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 17,
-    backgroundColor: "#EEF2F7",
+    backgroundColor: studentTheme.colors.primarySoft,
     marginBottom: 10,
   },
   logo: {
@@ -457,8 +465,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   choiceChipSelected: {
-    backgroundColor: "#0B5FA5",
-    borderColor: "#0B5FA5",
+    backgroundColor: studentTheme.colors.primary,
+    borderColor: studentTheme.colors.primary,
   },
   choiceChipText: {
     color: "#334155",
@@ -469,7 +477,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   submitButton: {
-    backgroundColor: "#0B5FA5",
+    backgroundColor: studentTheme.colors.primary,
     borderRadius: 12,
     paddingVertical: 14,
     alignItems: "center",

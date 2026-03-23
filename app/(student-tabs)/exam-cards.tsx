@@ -7,11 +7,13 @@ import {
   Modal,
   RefreshControl,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ExamCardDisplay from "../_components/ExamCardDisplay";
 import { useStudentAuth } from "../_context/StudentAuthContext";
 import api from "../_services/api";
@@ -20,10 +22,12 @@ import {
   openExamCardInSystemViewer,
   shareExamCardFile,
 } from "../_services/examCardFile";
+import { studentTheme } from "../_theme/studentTheme";
 import { ExamCard } from "../_types";
 
 export default function ExamCardsScreen() {
   const { student } = useStudentAuth();
+  const insets = useSafeAreaInsets();
   const [examCards, setExamCards] = useState<ExamCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -175,17 +179,25 @@ export default function ExamCardsScreen() {
 
         <View style={styles.actionsRow}>
           <TouchableOpacity style={styles.actionButton} onPress={() => handleDownload(item)}>
-            <MaterialIcons name="file-download" size={18} color="#1e88e5" />
+            <MaterialIcons
+              name="file-download"
+              size={18}
+              color={studentTheme.colors.primary}
+            />
             <Text style={styles.actionText}>Download</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton} onPress={() => handleShare(item)}>
-            <MaterialIcons name="share" size={18} color="#2e7d32" />
+            <MaterialIcons name="share" size={18} color={studentTheme.colors.primary} />
             <Text style={styles.actionText}>Share</Text>
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.actionButton} onPress={() => handlePreview(item)}>
-            <MaterialIcons name="visibility" size={18} color="#6a1b9a" />
+            <MaterialIcons
+              name="visibility"
+              size={18}
+              color={studentTheme.colors.primary}
+            />
             <Text style={styles.actionText}>Preview</Text>
           </TouchableOpacity>
 
@@ -235,7 +247,11 @@ export default function ExamCardsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={studentTheme.colors.statusBar}
+      />
+      <View style={[styles.header, { paddingTop: Math.max(insets.top + 14, 56) }]}>
         <Text style={styles.headerTitle}>My Exam Cards</Text>
         <Text style={styles.headerSubtitle}>Download, share, or delete your cards</Text>
       </View>
@@ -288,20 +304,19 @@ export default function ExamCardsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f6fa",
+    backgroundColor: studentTheme.colors.bg,
   },
   header: {
-    paddingTop: 60,
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: "#fff",
+    backgroundColor: studentTheme.colors.surface,
     borderBottomWidth: 1,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: studentTheme.colors.border,
   },
   headerTitle: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#2c3e50",
+    color: studentTheme.colors.primary,
   },
   headerSubtitle: {
     marginTop: 4,
@@ -348,7 +363,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   statusActive: {
-    backgroundColor: "#e8f5e9",
+    backgroundColor: studentTheme.colors.primarySoft,
   },
   statusExpired: {
     backgroundColor: "#fff3e0",
@@ -378,10 +393,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 5,
     paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+    backgroundColor: "#F8FAFC",
   },
   actionText: {
     fontSize: 13,
-    color: "#2c3e50",
+    color: studentTheme.colors.primary,
     fontWeight: "600",
   },
   modalOverlay: {
@@ -419,14 +437,14 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f5f6fa",
+    backgroundColor: studentTheme.colors.bg,
   },
   emptyState: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     padding: 30,
-    backgroundColor: "#f5f6fa",
+    backgroundColor: studentTheme.colors.bg,
   },
   emptyStateTitle: {
     fontSize: 22,

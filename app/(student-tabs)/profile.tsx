@@ -16,6 +16,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import api from "../_services/api";
+import { studentTheme } from "../_theme/studentTheme";
 import { AttendanceOverview, AttendanceTimetableEntry } from "../_types";
 
 const START_TIME_OPTIONS = ["07:00", "10:00", "13:00", "16:00"];
@@ -268,14 +269,17 @@ export default function StudentAttendanceScreen() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0B5FA5" />
+        <ActivityIndicator size="large" color={studentTheme.colors.primary} />
       </View>
     );
   }
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F4F7FB" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={studentTheme.colors.statusBar}
+      />
       <ScrollView
         contentContainerStyle={[
           styles.content,
@@ -340,7 +344,7 @@ export default function StudentAttendanceScreen() {
             <MaterialIcons
               name={feesCleared ? "info-outline" : "lock-outline"}
               size={18}
-              color={feesCleared ? "#2563EB" : "#B45309"}
+              color={feesCleared ? studentTheme.colors.primary : "#B45309"}
             />
             <Text style={styles.noticeText}>{registrationHint}</Text>
           </View>
@@ -641,13 +645,13 @@ function MetricBox({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F4F7FB",
+    backgroundColor: studentTheme.colors.bg,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F4F7FB",
+    backgroundColor: studentTheme.colors.bg,
   },
   content: {
     padding: 16,
@@ -760,12 +764,12 @@ const styles = StyleSheet.create({
     minWidth: 132,
   },
   weekChipCurrent: {
-    borderColor: "#2563EB",
-    backgroundColor: "#EFF6FF",
+    borderColor: studentTheme.colors.primary,
+    backgroundColor: studentTheme.colors.primarySoft,
   },
   weekChipSelected: {
-    borderColor: "#0B5FA5",
-    backgroundColor: "#0B5FA5",
+    borderColor: studentTheme.colors.primary,
+    backgroundColor: studentTheme.colors.primary,
   },
   weekChipLabel: {
     fontSize: 12,
@@ -824,7 +828,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF6FF",
   },
   tableSelectedCol: {
-    borderColor: "#0B5FA5",
+    borderColor: studentTheme.colors.primary,
   },
   tableMissedCell: {
     backgroundColor: "#FEF2F2",
@@ -833,7 +837,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#ECFDF3",
   },
   tableOpenCell: {
-    backgroundColor: "#EFF6FF",
+    backgroundColor: studentTheme.colors.primarySoft,
   },
   rowUnit: {
     fontSize: 13,
@@ -864,7 +868,7 @@ const styles = StyleSheet.create({
   },
   cellSignButton: {
     borderRadius: 8,
-    backgroundColor: "#0B5FA5",
+    backgroundColor: studentTheme.colors.primary,
     paddingHorizontal: 8,
     paddingVertical: 5,
   },
@@ -914,8 +918,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
   },
   chipSelected: {
-    backgroundColor: "#0B5FA5",
-    borderColor: "#0B5FA5",
+    backgroundColor: studentTheme.colors.primary,
+    borderColor: studentTheme.colors.primary,
   },
   chipText: {
     fontSize: 12,
@@ -927,7 +931,7 @@ const styles = StyleSheet.create({
   },
   addClassButton: {
     marginTop: 2,
-    backgroundColor: "#8E44AD",
+    backgroundColor: studentTheme.colors.primaryDark,
     borderRadius: 10,
     alignItems: "center",
     justifyContent: "center",
@@ -971,7 +975,7 @@ const styles = StyleSheet.create({
     padding: 8,
   },
   saveButton: {
-    backgroundColor: "#0B5FA5",
+    backgroundColor: studentTheme.colors.primary,
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: "center",

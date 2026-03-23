@@ -15,6 +15,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useStudentAuth } from "../_context/StudentAuthContext";
 import api from "../_services/api";
+import { studentTheme } from "../_theme/studentTheme";
 import { LecturerEvaluationRecord, LecturerEvaluationStatus } from "../_types";
 
 const formatKES = (amount: number) =>
@@ -109,14 +110,17 @@ export default function LecturerEvaluationsTab() {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#0B5FA5" />
+        <ActivityIndicator size="large" color={studentTheme.colors.primary} />
       </View>
     );
   }
 
   return (
       <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#F4F7FB" />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={studentTheme.colors.statusBar}
+      />
       <ScrollView
         contentContainerStyle={[
           styles.contentContainer,
@@ -184,7 +188,7 @@ export default function LecturerEvaluationsTab() {
             <MaterialIcons
               name={feesCleared ? "info-outline" : "lock-outline"}
               size={18}
-              color={feesCleared ? "#2563EB" : "#B45309"}
+              color={feesCleared ? studentTheme.colors.primary : "#B45309"}
             />
             <Text style={styles.noticeText}>{registrationHint}</Text>
           </View>
@@ -249,13 +253,13 @@ export default function LecturerEvaluationsTab() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#F4F7FB",
+    backgroundColor: studentTheme.colors.bg,
   },
   loadingContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F4F7FB",
+    backgroundColor: studentTheme.colors.bg,
   },
   contentContainer: {
     padding: 16,
@@ -312,7 +316,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   primaryButton: {
-    backgroundColor: "#0B5FA5",
+    backgroundColor: studentTheme.colors.primary,
     borderRadius: 10,
     flexDirection: "row",
     alignItems: "center",
@@ -401,7 +405,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   inlineButton: {
-    backgroundColor: "#8E44AD",
+    backgroundColor: studentTheme.colors.primary,
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 8,
