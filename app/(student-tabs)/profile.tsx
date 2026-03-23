@@ -4,6 +4,7 @@ import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   RefreshControl,
   ScrollView,
   StatusBar,
@@ -19,13 +20,11 @@ import { AttendanceOverview, AttendanceTimetableEntry } from "../_types";
 
 const START_TIME_OPTIONS = ["07:00", "10:00", "13:00", "16:00"];
 const DAYS = [
-  { label: "Sun", value: 0 },
   { label: "Mon", value: 1 },
   { label: "Tue", value: 2 },
   { label: "Wed", value: 3 },
   { label: "Thu", value: 4 },
   { label: "Fri", value: 5 },
-  { label: "Sat", value: 6 },
 ];
 
 const formatDay = (dayOfWeek: number) =>
@@ -47,6 +46,24 @@ const todaysDateISO = () => {
   return `${year}-${month}-${day}`;
 };
 
+const formatKES = (amount: number) =>
+  `KES ${Number(amount || 0).toLocaleString("en-KE", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })}`;
+
+const formatWeekRange = (startDate: string, endDate: string) => {
+  const start = new Date(`${startDate}T00:00:00Z`);
+  const end = new Date(`${endDate}T00:00:00Z`);
+  return `${start.toLocaleDateString("en-KE", {
+    month: "short",
+    day: "numeric",
+  })} - ${end.toLocaleDateString("en-KE", {
+    month: "short",
+    day: "numeric",
+  })}`;
+};
+
 export default function StudentAttendanceScreen() {
   const insets = useSafeAreaInsets();
   const [overview, setOverview] = useState<AttendanceOverview | null>(null);
@@ -54,6 +71,8 @@ export default function StudentAttendanceScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [savingTimetable, setSavingTimetable] = useState(false);
   const [signingKey, setSigningKey] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [selectedWeekIndex, setSelectedWeekIndex] = useState<number>(1);
 
   const [semesterStartDate, setSemesterStartDate] = useState(todaysDateISO());
   const [semesterWeeks, setSemesterWeeks] = useState("14");
@@ -65,6 +84,7 @@ export default function StudentAttendanceScreen() {
 
   const loadOverview = useCallback(async () => {
     try {
+      setLoadError(null);
       const response = await api.getAttendanceOverview();
       setOverview(response);
       setSemesterStartDate(
@@ -72,7 +92,12 @@ export default function StudentAttendanceScreen() {
       );
       setSemesterWeeks(String(response.timetableConfig.semesterWeeks || 14));
       setDraftEntries(response.weeklyTimetable || []);
+      const currentWeek = response.attendanceTable?.currentWeekIndex || 1;
+      setSelectedWeekIndex(currentWeek > 0 ? currentWeek : 1);
     } catch (error: any) {
+      setLoadError(
+        error?.response?.data?.message || "Failed to load attendance details.",
+      );
       Alert.alert(
         "Attendance Error",
         error?.response?.data?.message || "Failed to load attendance details.",
@@ -106,6 +131,23 @@ export default function StudentAttendanceScreen() {
   const selectedUnitName =
     registeredUnits.find((unit) => unit.unitCode === selectedUnitCode)
       ?.courseName || "";
+  const feesCleared = overview?.feesCleared ?? true;
+  const feeBalance = overview?.feeBalance ?? 0;
+  const hasRegisteredUnits = overview?.hasRegisteredUnits ?? false;
+  const canConfigureTimetable = feesCleared && hasRegisteredUnits;
+  const registrationHint = !feesCleared
+    ? `Attendance timetable is locked until fees are cleared. Current balance: ${formatKES(feeBalance)}.`
+    : "No registered units found yet. Register units first before attendance timetable setup.";
+
+  const weekColumns = overview?.attendanceTable?.weekColumns || [];
+  const tableRows = overview?.attendanceTable?.rows || [];
+  const selectedWeek =
+    weekColumns.find((week) => week.weekIndex === selectedWeekIndex) || null;
+
+  const studentName = overview?.studentDisplay?.fullName || "Student";
+  const studentId = overview?.studentDisplay?.studentId || "N/A";
+  const semesterWeeksValue =
+    overview?.semester?.semesterWeeks || Number(semesterWeeks) || 14;
 
   const handleAddClass = () => {
     if (!selectedUnitCode) {
@@ -132,7 +174,7 @@ export default function StudentAttendanceScreen() {
     if (classesOnDay.length >= 4) {
       Alert.alert(
         "Daily Limit Reached",
-        "You can only set up to 4 classes per day.",
+        "You can only set up to 4 classes per weekday.",
       );
       return;
     }
@@ -160,11 +202,8 @@ export default function StudentAttendanceScreen() {
   };
 
   const handleSaveTimetable = async () => {
-    if (!overview?.hasRegisteredUnits) {
-      Alert.alert(
-        "No Units",
-        "Register units first before setting attendance timetable.",
-      );
+    if (!canConfigureTimetable) {
+      Alert.alert("Timetable Locked", registrationHint);
       return;
     }
 
@@ -206,9 +245,12 @@ export default function StudentAttendanceScreen() {
     }
   };
 
-  const handleSignClass = async (unitCode: string, startTime: string) => {
-    const key = `${unitCode}-${startTime}`;
-    setSigningKey(key);
+  const handleSignClass = async (
+    unitCode: string,
+    startTime: string,
+    cellKey: string,
+  ) => {
+    setSigningKey(cellKey);
     try {
       await api.signClassAttendance({ unitCode, startTime });
       Alert.alert("Signed", "Attendance signed successfully.");
@@ -235,15 +277,40 @@ export default function StudentAttendanceScreen() {
     <View style={styles.container}>
       <StatusBar barStyle="dark-content" backgroundColor="#F4F7FB" />
       <ScrollView
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 90 }]}
+        contentContainerStyle={[
+          styles.content,
+          {
+            paddingTop: Math.max(insets.top + 8, 18),
+            paddingBottom: insets.bottom + 90,
+          },
+        ]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
         <View style={styles.headerCard}>
-          <Text style={styles.headerTitle}>Class Attendance</Text>
+          <View style={styles.schoolRow}>
+            <Image
+              source={require("../../assets/school_logo.jpeg")}
+              style={styles.schoolLogo}
+            />
+            <View style={styles.schoolTextWrap}>
+              <Text style={styles.schoolName}>SOUTH EASTERN KENYA UNIVERSITY</Text>
+              <Text style={styles.schoolSub}>Class Attendance Register</Text>
+            </View>
+          </View>
+          <View style={styles.studentRow}>
+            <Text style={styles.studentName}>{studentName}</Text>
+            <Text style={styles.studentMeta}>Reg No: {studentId}</Text>
+            <Text style={styles.studentMeta}>
+              Academic Year: {overview?.semester?.academicYear || "N/A"}
+            </Text>
+            <Text style={styles.studentMeta}>Semester Weeks: {semesterWeeksValue}</Text>
+          </View>
           <Text style={styles.headerSubtitle}>
-            Sign attendance after each class ends. Window closes in 10 minutes.
+            {canConfigureTimetable
+              ? "Attendance is signed only after class ends and within 10 minutes. Missed sessions are marked X."
+              : registrationHint}
           </Text>
           <View style={styles.metricsRow}>
             <MetricBox
@@ -255,57 +322,172 @@ export default function StudentAttendanceScreen() {
               value={`${overview?.metrics.attendedSessions ?? 0}`}
             />
             <MetricBox
-              label="Required"
+              label="Closed"
               value={`${overview?.metrics.expectedClosedSessions ?? 0}`}
             />
           </View>
         </View>
 
+        {loadError ? (
+          <View style={styles.noticeCardError}>
+            <MaterialIcons name="error-outline" size={18} color="#B91C1C" />
+            <Text style={styles.noticeTextError}>{loadError}</Text>
+          </View>
+        ) : null}
+
+        {!canConfigureTimetable ? (
+          <View style={styles.noticeCard}>
+            <MaterialIcons
+              name={feesCleared ? "info-outline" : "lock-outline"}
+              size={18}
+              color={feesCleared ? "#2563EB" : "#B45309"}
+            />
+            <Text style={styles.noticeText}>{registrationHint}</Text>
+          </View>
+        ) : null}
+
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Today's Classes</Text>
-          {(overview?.todayClasses || []).length === 0 ? (
-            <Text style={styles.emptyText}>No classes scheduled for today.</Text>
+          <Text style={styles.cardTitle}>Week Calendar</Text>
+          {weekColumns.length === 0 ? (
+            <Text style={styles.emptyText}>Save a timetable to generate semester weeks.</Text>
           ) : (
-            (overview?.todayClasses || []).map((classItem) => {
-              const key = `${classItem.unitCode}-${classItem.startTime}`;
-              return (
-                <View key={key} style={styles.classRow}>
-                  <View style={styles.classInfo}>
-                    <Text style={styles.classCode}>{classItem.unitCode}</Text>
-                    <Text style={styles.className}>{classItem.courseName}</Text>
-                    <Text style={styles.classTime}>
-                      {classItem.startTime} - {classItem.endTime}
-                    </Text>
-                  </View>
-                  {classItem.status === "sign_open" ? (
+            <>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                <View style={styles.weekChipRow}>
+                  {weekColumns.map((week) => (
                     <TouchableOpacity
-                      style={styles.signButton}
-                      onPress={() =>
-                        handleSignClass(classItem.unitCode, classItem.startTime)
-                      }
-                      disabled={signingKey === key}
+                      key={week.weekIndex}
+                      style={[
+                        styles.weekChip,
+                        week.isCurrent && styles.weekChipCurrent,
+                        selectedWeekIndex === week.weekIndex && styles.weekChipSelected,
+                      ]}
+                      onPress={() => setSelectedWeekIndex(week.weekIndex)}
                     >
-                      <Text style={styles.signButtonText}>
-                        {signingKey === key ? "Signing..." : "Sign"}
+                      <Text
+                        style={[
+                          styles.weekChipLabel,
+                          selectedWeekIndex === week.weekIndex &&
+                            styles.weekChipLabelSelected,
+                        ]}
+                      >
+                        {week.label}
+                      </Text>
+                      <Text
+                        style={[
+                          styles.weekChipDate,
+                          selectedWeekIndex === week.weekIndex &&
+                            styles.weekChipLabelSelected,
+                        ]}
+                      >
+                        {formatWeekRange(week.startDate, week.endDate)}
                       </Text>
                     </TouchableOpacity>
-                  ) : (
-                    <StatusPill status={classItem.status} />
-                  )}
+                  ))}
                 </View>
-              );
-            })
+              </ScrollView>
+              {selectedWeek ? (
+                <Text style={styles.selectedWeekText}>
+                  Selected: {selectedWeek.label} ({formatWeekRange(selectedWeek.startDate, selectedWeek.endDate)})
+                </Text>
+              ) : null}
+            </>
+          )}
+        </View>
+
+        <View style={styles.card}>
+          <Text style={styles.cardTitle}>Weekly Attendance Table</Text>
+          {tableRows.length === 0 || weekColumns.length === 0 ? (
+            <Text style={styles.emptyText}>No timetable rows available yet.</Text>
+          ) : (
+            <ScrollView horizontal showsHorizontalScrollIndicator>
+              <View>
+                <View style={[styles.tableRow, styles.tableHeaderRow]}>
+                  <View style={[styles.tableFirstCol, styles.tableHeaderCell]}>
+                    <Text style={styles.tableHeaderText}>Unit / Time</Text>
+                  </View>
+                  {weekColumns.map((week) => (
+                    <View
+                      key={week.weekIndex}
+                      style={[
+                        styles.tableWeekCell,
+                        styles.tableHeaderCell,
+                        week.isCurrent && styles.tableCurrentCol,
+                        selectedWeekIndex === week.weekIndex &&
+                          styles.tableSelectedCol,
+                      ]}
+                    >
+                      <Text style={styles.tableHeaderText}>{week.label}</Text>
+                    </View>
+                  ))}
+                </View>
+
+                {tableRows.map((row) => (
+                  <View key={row.rowKey} style={styles.tableRow}>
+                    <View style={styles.tableFirstCol}>
+                      <Text style={styles.rowUnit}>{row.unitCode}</Text>
+                      <Text style={styles.rowMeta}>
+                        {row.dayLabel} {row.classTime}
+                      </Text>
+                      <Text style={styles.rowCourse}>{row.courseName}</Text>
+                    </View>
+                    {row.weekCells.map((cell) => {
+                      const cellKey = `${row.rowKey}-${cell.weekIndex}`;
+                      const displayMark = cell.status === "locked" ? "-" : cell.mark;
+                      return (
+                        <View
+                          key={cellKey}
+                          style={[
+                            styles.tableWeekCell,
+                            selectedWeekIndex === cell.weekIndex &&
+                              styles.tableSelectedCol,
+                            cell.status === "missed" && styles.tableMissedCell,
+                            cell.status === "signed" && styles.tableSignedCell,
+                            cell.status === "sign_open" && styles.tableOpenCell,
+                          ]}
+                        >
+                          {cell.canSign ? (
+                            <TouchableOpacity
+                              style={styles.cellSignButton}
+                              onPress={() =>
+                                handleSignClass(row.unitCode, row.startTime, cellKey)
+                              }
+                              disabled={signingKey === cellKey}
+                            >
+                              <Text style={styles.cellSignText}>
+                                {signingKey === cellKey ? "..." : "Sign"}
+                              </Text>
+                            </TouchableOpacity>
+                          ) : (
+                            <Text
+                              style={[
+                                styles.cellMark,
+                                cell.status === "missed" && styles.cellMarkMissed,
+                                cell.status === "signed" && styles.cellMarkSigned,
+                              ]}
+                            >
+                              {displayMark}
+                            </Text>
+                          )}
+                        </View>
+                      );
+                    })}
+                  </View>
+                ))}
+              </View>
+            </ScrollView>
           )}
         </View>
 
         <View style={styles.card}>
           <Text style={styles.cardTitle}>Weekly Timetable Setup</Text>
-          {!overview?.hasRegisteredUnits ? (
-            <Text style={styles.emptyText}>
-              No registered units found. Register units first before timetable setup.
-            </Text>
+          {!canConfigureTimetable ? (
+            <Text style={styles.emptyText}>{registrationHint}</Text>
           ) : (
             <>
+              <Text style={styles.helperText}>
+                Weekdays only (Monday-Friday). Each class slot is 3 hours.
+              </Text>
               <View style={styles.inputRow}>
                 <View style={styles.inputGroup}>
                   <Text style={styles.inputLabel}>Semester Start Date</Text>
@@ -407,7 +589,10 @@ export default function StudentAttendanceScreen() {
                   <Text style={styles.emptyText}>No class slots added yet.</Text>
                 ) : (
                   draftEntries.map((entry, idx) => (
-                    <View key={`${entry.dayOfWeek}-${entry.startTime}-${entry.unitCode}`} style={styles.entryRow}>
+                    <View
+                      key={`${entry.dayOfWeek}-${entry.startTime}-${entry.unitCode}`}
+                      style={styles.entryRow}
+                    >
                       <View style={styles.entryInfo}>
                         <Text style={styles.entryCode}>
                           {entry.unitCode} - {entry.courseName}
@@ -453,23 +638,6 @@ function MetricBox({ label, value }: { label: string; value: string }) {
   );
 }
 
-function StatusPill({ status }: { status: string }) {
-  const map: Record<string, { text: string; bg: string; color: string }> = {
-    pending: { text: "Pending", bg: "#E2E8F0", color: "#334155" },
-    sign_open: { text: "Sign Open", bg: "#DCFCE7", color: "#15803D" },
-    signed: { text: "Signed", bg: "#DBEAFE", color: "#1D4ED8" },
-    missed_locked: { text: "Locked", bg: "#FEE2E2", color: "#B91C1C" },
-    out_of_semester: { text: "Semester Off", bg: "#F3E8FF", color: "#7E22CE" },
-  };
-  const item = map[status] || map.pending;
-
-  return (
-    <View style={[styles.statusPill, { backgroundColor: item.bg }]}>
-      <Text style={[styles.statusPillText, { color: item.color }]}>{item.text}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -492,13 +660,44 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
   },
-  headerTitle: {
-    fontSize: 20,
+  schoolRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  schoolLogo: {
+    width: 52,
+    height: 52,
+    borderRadius: 8,
+  },
+  schoolTextWrap: {
+    flex: 1,
+  },
+  schoolName: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#0F172A",
+  },
+  schoolSub: {
+    fontSize: 12,
+    color: "#475569",
+    marginTop: 2,
+  },
+  studentRow: {
+    marginTop: 12,
+  },
+  studentName: {
+    fontSize: 18,
     fontWeight: "800",
     color: "#1E293B",
   },
+  studentMeta: {
+    marginTop: 2,
+    fontSize: 12,
+    color: "#475569",
+  },
   headerSubtitle: {
-    marginTop: 6,
+    marginTop: 10,
     fontSize: 13,
     color: "#475569",
   },
@@ -538,58 +737,141 @@ const styles = StyleSheet.create({
     color: "#1E293B",
     marginBottom: 10,
   },
+  helperText: {
+    fontSize: 12,
+    color: "#64748B",
+    marginBottom: 10,
+  },
   emptyText: {
     fontSize: 13,
     color: "#64748B",
   },
-  classRow: {
-    borderWidth: 1,
-    borderColor: "#E5EAF1",
-    borderRadius: 10,
-    padding: 10,
-    marginBottom: 8,
+  weekChipRow: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    gap: 8,
   },
-  classInfo: {
-    flex: 1,
-    paddingRight: 8,
+  weekChip: {
+    borderWidth: 1,
+    borderColor: "#CBD5E1",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 8,
+    backgroundColor: "#FFFFFF",
+    minWidth: 132,
   },
-  classCode: {
-    fontSize: 14,
+  weekChipCurrent: {
+    borderColor: "#2563EB",
+    backgroundColor: "#EFF6FF",
+  },
+  weekChipSelected: {
+    borderColor: "#0B5FA5",
+    backgroundColor: "#0B5FA5",
+  },
+  weekChipLabel: {
+    fontSize: 12,
     fontWeight: "800",
-    color: "#1F2937",
+    color: "#1E293B",
   },
-  className: {
+  weekChipDate: {
+    marginTop: 2,
+    fontSize: 11,
+    color: "#64748B",
+  },
+  weekChipLabelSelected: {
+    color: "#FFFFFF",
+  },
+  selectedWeekText: {
+    marginTop: 8,
     fontSize: 12,
     color: "#334155",
-    marginTop: 2,
+    fontWeight: "600",
   },
-  classTime: {
+  tableRow: {
+    flexDirection: "row",
+  },
+  tableHeaderRow: {
+    borderBottomWidth: 1,
+    borderBottomColor: "#CBD5E1",
+  },
+  tableHeaderCell: {
+    backgroundColor: "#F8FAFC",
+  },
+  tableHeaderText: {
     fontSize: 12,
-    color: "#64748B",
-    marginTop: 2,
+    fontWeight: "800",
+    color: "#1E293B",
+    textAlign: "center",
   },
-  signButton: {
-    backgroundColor: "#0B5FA5",
-    borderRadius: 8,
-    paddingHorizontal: 12,
+  tableFirstCol: {
+    width: 190,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    paddingHorizontal: 8,
     paddingVertical: 8,
+    justifyContent: "center",
+    backgroundColor: "#FFFFFF",
   },
-  signButtonText: {
-    color: "#FFFFFF",
-    fontWeight: "700",
-    fontSize: 12,
+  tableWeekCell: {
+    width: 70,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    backgroundColor: "#FFFFFF",
   },
-  statusPill: {
-    borderRadius: 999,
-    paddingVertical: 6,
-    paddingHorizontal: 10,
+  tableCurrentCol: {
+    backgroundColor: "#EEF6FF",
   },
-  statusPillText: {
+  tableSelectedCol: {
+    borderColor: "#0B5FA5",
+  },
+  tableMissedCell: {
+    backgroundColor: "#FEF2F2",
+  },
+  tableSignedCell: {
+    backgroundColor: "#ECFDF3",
+  },
+  tableOpenCell: {
+    backgroundColor: "#EFF6FF",
+  },
+  rowUnit: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#0F172A",
+  },
+  rowMeta: {
+    marginTop: 2,
     fontSize: 11,
+    color: "#334155",
     fontWeight: "700",
+  },
+  rowCourse: {
+    marginTop: 2,
+    fontSize: 11,
+    color: "#64748B",
+  },
+  cellMark: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: "#475569",
+  },
+  cellMarkMissed: {
+    color: "#B91C1C",
+  },
+  cellMarkSigned: {
+    color: "#15803D",
+  },
+  cellSignButton: {
+    borderRadius: 8,
+    backgroundColor: "#0B5FA5",
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
+  cellSignText: {
+    color: "#FFFFFF",
+    fontSize: 11,
+    fontWeight: "800",
   },
   inputRow: {
     flexDirection: "row",
@@ -702,5 +984,35 @@ const styles = StyleSheet.create({
   disabledButton: {
     opacity: 0.6,
   },
+  noticeCard: {
+    backgroundColor: "#FFF7ED",
+    borderColor: "#FED7AA",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  noticeText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#7C2D12",
+    lineHeight: 18,
+  },
+  noticeCardError: {
+    backgroundColor: "#FEF2F2",
+    borderColor: "#FECACA",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  noticeTextError: {
+    flex: 1,
+    fontSize: 12,
+    color: "#B91C1C",
+  },
 });
-

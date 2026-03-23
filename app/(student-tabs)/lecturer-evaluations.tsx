@@ -17,6 +17,12 @@ import { useStudentAuth } from "../_context/StudentAuthContext";
 import api from "../_services/api";
 import { LecturerEvaluationRecord, LecturerEvaluationStatus } from "../_types";
 
+const formatKES = (amount: number) =>
+  `KES ${Number(amount || 0).toLocaleString("en-KE", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  })}`;
+
 export default function LecturerEvaluationsTab() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -25,6 +31,7 @@ export default function LecturerEvaluationsTab() {
   const [refreshing, setRefreshing] = useState(false);
   const [status, setStatus] = useState<LecturerEvaluationStatus | null>(null);
   const [evaluations, setEvaluations] = useState<LecturerEvaluationRecord[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   const loadData = useCallback(async () => {
     if (!student) {
@@ -32,6 +39,7 @@ export default function LecturerEvaluationsTab() {
       return;
     }
     try {
+      setLoadError(null);
       const [statusData, listData] = await Promise.all([
         api.getLecturerEvaluationStatus(student.studentId),
         api.getStudentLecturerEvaluations(),
@@ -47,6 +55,7 @@ export default function LecturerEvaluationsTab() {
       );
     } catch (error) {
       console.error("Failed to load lecturer evaluations:", error);
+      setLoadError("Unable to load lecturer evaluations right now.");
     } finally {
       setLoading(false);
     }
@@ -80,6 +89,12 @@ export default function LecturerEvaluationsTab() {
   }, [status?.missingUnitCodes, unitTitleByCode]);
 
   const hasRegisteredUnits = status?.hasRegisteredUnits ?? false;
+  const feesCleared = status?.feesCleared ?? true;
+  const feeBalance = status?.feeBalance ?? 0;
+  const canAddEvaluation = feesCleared && hasRegisteredUnits;
+  const registrationHint = !feesCleared
+    ? `Unit registration and evaluations are locked until fees are cleared. Current balance: ${formatKES(feeBalance)}.`
+    : "No registered units found yet. Once units are registered, evaluate all assigned lecturers.";
 
   const openEvaluationForm = (unitCode?: string, unitTitle?: string) => {
     router.push({
@@ -100,12 +115,15 @@ export default function LecturerEvaluationsTab() {
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      <View style={styles.container}>
+      <StatusBar barStyle="dark-content" backgroundColor="#F4F7FB" />
       <ScrollView
         contentContainerStyle={[
           styles.contentContainer,
-          { paddingBottom: insets.bottom + 90 },
+          {
+            paddingTop: Math.max(insets.top + 8, 18),
+            paddingBottom: insets.bottom + 90,
+          },
         ]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
@@ -114,8 +132,9 @@ export default function LecturerEvaluationsTab() {
         <View style={styles.headerCard}>
           <Text style={styles.title}>Lecturer Evaluations</Text>
           <Text style={styles.subtitle}>
-            Evaluate each lecturer for all registered units before exam card
-            generation.
+            {canAddEvaluation
+              ? "Evaluate each lecturer for all registered units before exam card generation."
+              : registrationHint}
           </Text>
           <View style={styles.progressRow}>
             <View style={styles.metricBox}>
@@ -141,22 +160,41 @@ export default function LecturerEvaluationsTab() {
           <TouchableOpacity
             style={[
               styles.primaryButton,
-              !hasRegisteredUnits && styles.primaryButtonDisabled,
+              !canAddEvaluation && styles.primaryButtonDisabled,
             ]}
             onPress={() => openEvaluationForm()}
-            disabled={!hasRegisteredUnits}
+            disabled={!canAddEvaluation}
           >
             <MaterialIcons name="add" size={20} color="#fff" />
-            <Text style={styles.primaryButtonText}>Add New Evaluation</Text>
+            <Text style={styles.primaryButtonText}>
+              {canAddEvaluation ? "Add New Evaluation" : "Evaluation Locked"}
+            </Text>
           </TouchableOpacity>
         </View>
 
+        {loadError ? (
+          <View style={styles.noticeCardError}>
+            <MaterialIcons name="error-outline" size={18} color="#B91C1C" />
+            <Text style={styles.noticeTextError}>{loadError}</Text>
+          </View>
+        ) : null}
+
+        {!canAddEvaluation ? (
+          <View style={styles.noticeCard}>
+            <MaterialIcons
+              name={feesCleared ? "info-outline" : "lock-outline"}
+              size={18}
+              color={feesCleared ? "#2563EB" : "#B45309"}
+            />
+            <Text style={styles.noticeText}>{registrationHint}</Text>
+          </View>
+        ) : null}
+
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Pending Units</Text>
-          {!hasRegisteredUnits ? (
+          {!canAddEvaluation ? (
             <Text style={styles.emptyText}>
-              No registered units found. Register units first, then evaluate all
-              assigned lecturers.
+              {registrationHint}
             </Text>
           ) : missingUnits.length === 0 ? (
             <Text style={styles.emptyText}>
@@ -183,7 +221,11 @@ export default function LecturerEvaluationsTab() {
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Evaluated Lecturers</Text>
           {evaluations.length === 0 ? (
-            <Text style={styles.emptyText}>No lecturer evaluations submitted yet.</Text>
+            <Text style={styles.emptyText}>
+              {canAddEvaluation
+                ? "No lecturer evaluations submitted yet."
+                : "No lecturer evaluations available yet."}
+            </Text>
           ) : (
             evaluations.map((item) => (
               <View key={item._id} style={styles.evaluationRow}>
@@ -284,7 +326,38 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   primaryButtonDisabled: {
-    opacity: 0.45,
+    opacity: 0.6,
+  },
+  noticeCard: {
+    backgroundColor: "#FFF7ED",
+    borderColor: "#FED7AA",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  noticeText: {
+    flex: 1,
+    fontSize: 12,
+    color: "#7C2D12",
+    lineHeight: 18,
+  },
+  noticeCardError: {
+    backgroundColor: "#FEF2F2",
+    borderColor: "#FECACA",
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  noticeTextError: {
+    flex: 1,
+    fontSize: 12,
+    color: "#B91C1C",
   },
   sectionCard: {
     backgroundColor: "#fff",

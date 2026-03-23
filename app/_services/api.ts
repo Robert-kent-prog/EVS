@@ -463,6 +463,8 @@ class ApiService {
     completedUnits: number;
     completed: boolean;
     hasRegisteredUnits: boolean;
+    feesCleared: boolean;
+    feeBalance: number;
   }> {
     const response = await this.studentGet("/student/evaluations");
     return response.data.data || response.data;
