@@ -42,6 +42,17 @@ const questionLabels: Record<QuestionKey, string> = {
     "Lecturer covered all topics in the course description",
 };
 
+const createEmptyAnswers = (): Record<QuestionKey, boolean | null> => ({
+  courseOutlineGiven: null,
+  cat1Administered: null,
+  cat2Administered: null,
+  cat1Returned: null,
+  cat2Returned: null,
+  lecturerAttendedAllLectures: null,
+  unitRelevantToDegree: null,
+  lecturerCoveredAllTopics: null,
+});
+
 export default function LecturerEvaluationScreen() {
   const { unitCode: unitCodeParam, unitTitle: unitTitleParam } =
     useLocalSearchParams<{
@@ -56,25 +67,24 @@ export default function LecturerEvaluationScreen() {
   const [unitCode, setUnitCode] = useState("");
   const [unitTitle, setUnitTitle] = useState("");
   const [lecturerName, setLecturerName] = useState("");
-  const [answers, setAnswers] = useState<Record<QuestionKey, boolean | null>>({
-    courseOutlineGiven: null,
-    cat1Administered: null,
-    cat2Administered: null,
-    cat1Returned: null,
-    cat2Returned: null,
-    lecturerAttendedAllLectures: null,
-    unitRelevantToDegree: null,
-    lecturerCoveredAllTopics: null,
-  });
+  const [answers, setAnswers] = useState<Record<QuestionKey, boolean | null>>(
+    createEmptyAnswers(),
+  );
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    if (typeof unitCodeParam === "string" && unitCodeParam.trim()) {
-      setUnitCode(unitCodeParam.toUpperCase());
-    }
-    if (typeof unitTitleParam === "string" && unitTitleParam.trim()) {
-      setUnitTitle(unitTitleParam);
-    }
+    setUnitCode(
+      typeof unitCodeParam === "string" && unitCodeParam.trim()
+        ? unitCodeParam.toUpperCase()
+        : "",
+    );
+    setUnitTitle(
+      typeof unitTitleParam === "string" && unitTitleParam.trim()
+        ? unitTitleParam
+        : "",
+    );
+    setLecturerName("");
+    setAnswers(createEmptyAnswers());
   }, [unitCodeParam, unitTitleParam]);
 
   const missingFields = useMemo(() => {
@@ -154,6 +164,18 @@ export default function LecturerEvaluationScreen() {
       const response = await api.submitLecturerEvaluation(payload);
       const lastSubmittedAt =
         response?.data?.lastSubmittedAt || new Date().toISOString();
+      setLecturerName("");
+      setAnswers(createEmptyAnswers());
+      setUnitCode(
+        typeof unitCodeParam === "string" && unitCodeParam.trim()
+          ? unitCodeParam.toUpperCase()
+          : "",
+      );
+      setUnitTitle(
+        typeof unitTitleParam === "string" && unitTitleParam.trim()
+          ? unitTitleParam
+          : "",
+      );
       await updateStudent({
         lecturerEvaluations: {
           completed: !!response?.data?.completed,
