@@ -2,6 +2,21 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { API_BASE_URL } from "../_config/api";
 import {
+  SESSION_KEYS,
+  clearAllSessionStorage,
+  clearInvigilatorSessionStorage,
+  clearStudentSessionStorage,
+  getBestAvailableAccessToken,
+  getInvigilatorRefreshToken,
+  getInvigilatorSessionToken,
+  getStudentRefreshToken,
+  getStudentSessionToken,
+  setInvigilatorRefreshToken,
+  setInvigilatorSessionToken,
+  setStudentRefreshToken,
+  setStudentSessionToken,
+} from "./secureSession";
+import {
   AttendanceOverview,
   AttendanceTimetablePayload,
   EligibilityStatus,
@@ -19,6 +34,7 @@ class ApiService {
   private api: AxiosInstance;
   private studentApi: AxiosInstance;
   private invigilatorApi: AxiosInstance;
+  private refreshRequest: Promise<string | null> | null = null;
 
   constructor() {
     // Main API instance
@@ -60,49 +76,169 @@ class ApiService {
 
   private setupInterceptors(instance: AxiosInstance) {
     instance.interceptors.request.use(async (config) => {
-      const token = await AsyncStorage.getItem("accessToken");
+      const token = await getBestAvailableAccessToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
     });
 
-    instance.interceptors.response.use(
-      (response) => response,
-      async (error: AxiosError) => {
-        if (error.response?.status === 401) {
-          await AsyncStorage.multiRemove([
-            "accessToken",
-            "userType",
-            "studentData",
-            "invigilatorData",
-            "studentToken",
-            "invigilatorToken",
-          ]);
-        }
-        return Promise.reject(error);
-      },
-    );
+    this.attachUnauthorizedResponseHandler(instance);
   }
 
   private setupStudentInterceptors() {
     this.studentApi.interceptors.request.use(async (config) => {
-      const token = await AsyncStorage.getItem("studentToken");
+      const token = await getStudentSessionToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
     });
+
+    this.attachUnauthorizedResponseHandler(this.studentApi, "student");
   }
 
   private setupInvigilatorInterceptors() {
     this.invigilatorApi.interceptors.request.use(async (config) => {
-      const token = await AsyncStorage.getItem("invigilatorToken");
+      const token = await getInvigilatorSessionToken();
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
       return config;
     });
+
+    this.attachUnauthorizedResponseHandler(this.invigilatorApi, "invigilator");
+  }
+
+  private attachUnauthorizedResponseHandler(
+    instance: AxiosInstance,
+    userTypeHint?: "student" | "invigilator",
+  ) {
+    instance.interceptors.response.use(
+      (response) => response,
+      async (error: AxiosError) => {
+        const statusCode = error.response?.status;
+        const originalRequest = error.config as any;
+        const requestUrl = String(originalRequest?.url || "");
+
+        if (
+          !statusCode ||
+          ![401, 403].includes(statusCode) ||
+          !originalRequest ||
+          originalRequest._retry ||
+          requestUrl.includes("/auth/login") ||
+          requestUrl.includes("/auth/student/login") ||
+          requestUrl.includes("/auth/refresh") ||
+          requestUrl.includes("/auth/logout") ||
+          requestUrl.includes("/verify-token")
+        ) {
+          if (
+            requestUrl.includes("/auth/refresh") &&
+            statusCode !== undefined &&
+            [401, 403].includes(statusCode)
+          ) {
+            await clearAllSessionStorage();
+          }
+          return Promise.reject(error);
+        }
+
+        originalRequest._retry = true;
+        const refreshedAccessToken = await this.refreshCurrentSession(userTypeHint);
+
+        if (!refreshedAccessToken) {
+          await clearAllSessionStorage();
+          return Promise.reject(error);
+        }
+
+        originalRequest.headers = originalRequest.headers || {};
+        originalRequest.headers.Authorization = `Bearer ${refreshedAccessToken}`;
+        return instance(originalRequest);
+      },
+    );
+  }
+
+  private async performRefresh(userType: "student" | "invigilator") {
+    const refreshToken =
+      userType === "student"
+        ? await getStudentRefreshToken()
+        : await getInvigilatorRefreshToken();
+
+    if (!refreshToken) {
+      return null;
+    }
+
+    try {
+      const response = await this.api.post("/auth/refresh", { refreshToken });
+      const data = response.data;
+      const accessToken = data.accessToken || data.data?.accessToken;
+      const nextRefreshToken = data.refreshToken || data.data?.refreshToken;
+
+      if (!accessToken || !nextRefreshToken) {
+        return null;
+      }
+
+      if (userType === "student") {
+        await setStudentSessionToken(accessToken);
+        await setStudentRefreshToken(nextRefreshToken);
+      } else {
+        await setInvigilatorSessionToken(accessToken);
+        await setInvigilatorRefreshToken(nextRefreshToken);
+      }
+
+      return accessToken;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  async refreshCurrentSession(
+    userTypeHint?: "student" | "invigilator",
+  ): Promise<string | null> {
+    const storedUserType = await AsyncStorage.getItem(SESSION_KEYS.userType);
+    const userType =
+      userTypeHint ||
+      (storedUserType === "student" || storedUserType === "invigilator"
+        ? storedUserType
+        : null);
+
+    if (!userType) {
+      return null;
+    }
+
+    if (!this.refreshRequest) {
+      this.refreshRequest = this.performRefresh(userType).finally(() => {
+        this.refreshRequest = null;
+      });
+    }
+
+    return this.refreshRequest;
+  }
+
+  async verifyStoredSession(
+    userTypeHint?: "student" | "invigilator",
+  ): Promise<boolean> {
+    const accessToken =
+      userTypeHint === "student"
+        ? await getStudentSessionToken()
+        : userTypeHint === "invigilator"
+          ? await getInvigilatorSessionToken()
+          : await getBestAvailableAccessToken();
+
+    if (!accessToken) {
+      return false;
+    }
+
+    try {
+      const response = await this.api.post("/verify-token", null, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
+      return response.status === 200;
+    } catch {
+      const refreshedAccessToken = await this.refreshCurrentSession(userTypeHint);
+      return Boolean(refreshedAccessToken);
+    }
   }
 
   // ============ HTTP METHODS ============
@@ -167,6 +303,13 @@ class ApiService {
     return this.studentApi.put(url, data, config);
   }
 
+  async studentDelete<T = any>(
+    url: string,
+    config?: any,
+  ): Promise<{ data: T }> {
+    return this.studentApi.delete(url, config);
+  }
+
   // Invigilator-specific HTTP methods
   async invigilatorGet<T = any>(
     url: string,
@@ -198,12 +341,21 @@ class ApiService {
       // Backend returns { accessToken, user }
       if (data.accessToken || data.token) {
         const token = data.accessToken || data.token || data.data?.token;
+        const refreshToken =
+          data.refreshToken || data.data?.refreshToken || null;
         const student = data.user || data.student || data.data?.student;
 
-        if (token) {
-          await AsyncStorage.setItem("studentToken", token);
-          await AsyncStorage.setItem("userType", "student");
-          await AsyncStorage.setItem("studentData", JSON.stringify(student));
+        if (token && refreshToken) {
+          await setStudentSessionToken(token);
+          await setStudentRefreshToken(refreshToken);
+          await AsyncStorage.multiRemove([
+            SESSION_KEYS.userData,
+            SESSION_KEYS.invigilatorData,
+          ]);
+          await AsyncStorage.multiSet([
+            [SESSION_KEYS.userType, "student"],
+            [SESSION_KEYS.studentData, JSON.stringify(student)],
+          ]);
         }
 
         return {
@@ -258,7 +410,7 @@ class ApiService {
   // ============ STUDENT SERVICES ============
 
   async getStudentProfile(studentId: string): Promise<Student> {
-    const response = await this.get(`/student/${studentId}`);
+    const response = await this.studentGet(`/student/${studentId}`);
     return response.data.data || response.data;
   }
 
@@ -278,15 +430,19 @@ class ApiService {
       // Backend returns { accessToken, user }
       if (data.accessToken || data.token) {
         const token = data.accessToken || data.token || data.data?.token;
+        const refreshToken =
+          data.refreshToken || data.data?.refreshToken || null;
         const invigilator = data.user || data.invigilator || data.data?.user;
 
-        if (token) {
-          await AsyncStorage.setItem("invigilatorToken", token);
-          await AsyncStorage.setItem("userType", "invigilator");
-          await AsyncStorage.setItem(
-            "invigilatorData",
-            JSON.stringify(invigilator),
-          );
+        if (token && refreshToken) {
+          await setInvigilatorSessionToken(token);
+          await setInvigilatorRefreshToken(refreshToken);
+          await AsyncStorage.removeItem(SESSION_KEYS.studentData);
+          await AsyncStorage.multiSet([
+            [SESSION_KEYS.userType, "invigilator"],
+            [SESSION_KEYS.invigilatorData, JSON.stringify(invigilator)],
+            [SESSION_KEYS.userData, JSON.stringify(invigilator)],
+          ]);
         }
 
         return {
@@ -351,40 +507,36 @@ class ApiService {
 
   // ============ LOGOUT ============
   async logout(userType?: string): Promise<void> {
-    const type = userType || (await AsyncStorage.getItem("userType"));
+    const type = userType || (await AsyncStorage.getItem(SESSION_KEYS.userType));
+    const refreshToken =
+      type === "student"
+        ? await getStudentRefreshToken()
+        : await getInvigilatorRefreshToken();
+
+    try {
+      if (refreshToken) {
+        await this.api.post("/auth/logout", { refreshToken });
+      }
+    } catch (error) {
+      console.error("Remote logout error:", error);
+    }
 
     if (type === "student") {
-      await AsyncStorage.multiRemove([
-        "studentToken",
-        "studentData",
-        "userType",
-      ]);
+      await clearStudentSessionStorage();
     } else {
-      await AsyncStorage.multiRemove([
-        "invigilatorToken",
-        "invigilatorData",
-        "accessToken",
-        "userType",
-      ]);
+      await clearInvigilatorSessionStorage();
     }
   }
 
   async logoutAll(): Promise<void> {
-    await AsyncStorage.multiRemove([
-      "studentToken",
-      "studentData",
-      "invigilatorToken",
-      "invigilatorData",
-      "accessToken",
-      "userType",
-    ]);
+    await clearAllSessionStorage();
   }
 
   // --- Exam Card System ---
 
   async checkEligibility(studentId: string): Promise<EligibilityStatus> {
     try {
-      const response = await this.get(`/exam-cards/eligibility/${studentId}`);
+      const response = await this.studentGet(`/exam-cards/eligibility/${studentId}`);
       return response.data.data || response.data;
     } catch (error) {
       console.error("Error checking eligibility:", error);
@@ -394,7 +546,7 @@ class ApiService {
 
   async generateExamCard(studentId: string): Promise<ExamCard> {
     try {
-      const response = await this.post("/exam-cards/generate", { studentId });
+      const response = await this.studentPost("/exam-cards/generate", { studentId });
       return response.data.data || response.data.examCard || response.data;
     } catch (error) {
       console.error("Error generating exam card:", error);
@@ -404,7 +556,7 @@ class ApiService {
 
   async getStudentExamCards(studentId: string): Promise<ExamCard[]> {
     try {
-      const response = await this.get(`/exam-cards/student/${studentId}`);
+      const response = await this.studentGet(`/exam-cards/student/${studentId}`);
       return response.data.data || response.data;
     } catch (error) {
       console.error("Error fetching student exam cards:", error);
@@ -414,7 +566,7 @@ class ApiService {
 
   async getCurrentExamCard(studentId: string): Promise<ExamCard | null> {
     try {
-      const response = await this.get(`/exam-cards/current/${studentId}`);
+      const response = await this.studentGet(`/exam-cards/current/${studentId}`);
       return response.data.data || response.data;
     } catch (error) {
       if (error && typeof error === "object" && "response" in error) {
@@ -428,11 +580,9 @@ class ApiService {
     }
   }
 
-  async deleteExamCard(cardId: string, studentId: string): Promise<void> {
+  async deleteExamCard(cardId: string, _studentId: string): Promise<void> {
     try {
-      await this.delete(`/exam-cards/${cardId}`, {
-        data: { studentId },
-      });
+      await this.studentDelete(`/exam-cards/${cardId}`);
     } catch (error) {
       console.error("Error deleting exam card:", error);
       throw error;

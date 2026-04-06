@@ -1,6 +1,11 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { buildApiUrl } from "../_config/api";
+import api from "../_services/api";
+import {
+  SESSION_KEYS,
+  getInvigilatorSessionToken,
+  setInvigilatorSessionToken,
+} from "../_services/secureSession";
 
 interface User {
   userId: string;
@@ -41,10 +46,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const updatedUser = { ...user, ...userData };
       setUser(updatedUser);
 
-      // Also update AsyncStorage to persist the changes
       const { token, ...userDataWithoutToken } = updatedUser;
       await AsyncStorage.setItem(
-        "userData",
+        SESSION_KEYS.userData,
+        JSON.stringify(userDataWithoutToken),
+      );
+      await AsyncStorage.setItem(
+        SESSION_KEYS.invigilatorData,
         JSON.stringify(userDataWithoutToken),
       );
     } catch (error) {
@@ -57,8 +65,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const loadAuthState = async () => {
       try {
-        const token = await AsyncStorage.getItem("authToken");
-        const userDataString = await AsyncStorage.getItem("userData");
+        const token = await getInvigilatorSessionToken();
+        const userDataString =
+          (await AsyncStorage.getItem(SESSION_KEYS.userData)) ||
+          (await AsyncStorage.getItem(SESSION_KEYS.invigilatorData));
 
         if (token && userDataString) {
           const userData = JSON.parse(userDataString);
@@ -70,13 +80,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           ) {
             const isValid = await verifyToken(token);
             if (isValid) {
+              const activeToken = (await getInvigilatorSessionToken()) || token;
               setUser({
                 userId: userData.userId,
                 userName: userData.userName,
                 staffNo: userData.staffNo,
                 role: userData.role,
                 email: userData.email || "",
-                token,
+                token: activeToken,
               });
             } else {
               await logout();
@@ -96,21 +107,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   // Verify token with backend
   const verifyToken = async (token?: string): Promise<boolean> => {
-    const tokenToVerify = token || user?.token;
-    if (!tokenToVerify) return false;
-
     try {
-      const response = await fetch(
-        buildApiUrl("/verify-token"),
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${tokenToVerify}`,
-          },
-        },
-      );
-      return response.ok;
+      const isValid = await api.verifyStoredSession("invigilator");
+      if (isValid) {
+        const refreshedToken = await getInvigilatorSessionToken();
+        if (refreshedToken && user) {
+          setUser({ ...user, token: refreshedToken });
+        }
+      }
+      return isValid;
     } catch (error) {
       console.error("Token verification error:", error);
       return false;
@@ -128,8 +133,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         email: userData.email || "",
       };
 
-      await AsyncStorage.setItem("authToken", token);
-      await AsyncStorage.setItem("userData", JSON.stringify(completeUserData));
+      await setInvigilatorSessionToken(token);
+      await AsyncStorage.removeItem(SESSION_KEYS.studentData);
+      await AsyncStorage.multiSet([
+        [SESSION_KEYS.userType, "invigilator"],
+        [SESSION_KEYS.userData, JSON.stringify(completeUserData)],
+        [SESSION_KEYS.invigilatorData, JSON.stringify(completeUserData)],
+      ]);
       setUser({ ...completeUserData, token });
     } catch (error) {
       console.error("Login error:", error);
@@ -140,8 +150,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // Logout function
   const logout = async () => {
     try {
-      await AsyncStorage.removeItem("authToken");
-      await AsyncStorage.removeItem("userData");
+      await api.logout("invigilator");
       setUser(null);
     } catch (error) {
       console.error("Logout error:", error);

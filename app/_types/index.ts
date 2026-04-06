@@ -222,11 +222,13 @@ export interface Invigilator {
 
 export interface InvigilatorAuthResponse {
   token: string;
+  refreshToken?: string;
   user: Invigilator;
 }
 
 export interface StudentAuthResponse {
   token: string;
+  refreshToken?: string;
   student: Student;
 }
 

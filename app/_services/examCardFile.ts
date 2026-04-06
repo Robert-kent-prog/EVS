@@ -1,13 +1,10 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system";
 import * as IntentLauncher from "expo-intent-launcher";
 import * as Sharing from "expo-sharing";
 import { Linking, Platform } from "react-native";
 import api from "./api";
 import { downloadExamCardPDF } from "./examCard";
-
-const STUDENT_TOKEN_KEY = "studentToken";
-const ACCESS_TOKEN_KEY = "accessToken";
+import { getBestAvailableAccessToken } from "./secureSession";
 
 const getAbsoluteUrl = (url: string): string => {
   return url.startsWith("http")
@@ -16,9 +13,7 @@ const getAbsoluteUrl = (url: string): string => {
 };
 
 const getAuthHeaders = async (): Promise<Record<string, string>> => {
-  const token =
-    (await AsyncStorage.getItem(STUDENT_TOKEN_KEY)) ||
-    (await AsyncStorage.getItem(ACCESS_TOKEN_KEY));
+  const token = await getBestAvailableAccessToken();
 
   if (!token) {
     throw new Error("You are not authenticated. Please log in again.");

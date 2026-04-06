@@ -3,6 +3,11 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useReducer } from "react";
 import api from "../_services/api";
 import {
+  SESSION_KEYS,
+  getStudentSessionToken,
+  setStudentSessionToken,
+} from "../_services/secureSession";
+import {
     EligibilityStatus,
     ExamCard,
     Student,
@@ -10,9 +15,6 @@ import {
     StudentAuthContextType,
     StudentAuthState,
 } from "../_types";
-
-const STUDENT_TOKEN_KEY = "studentToken";
-const STUDENT_DATA_KEY = "studentData";
 
 // Initial state
 const initialState: StudentAuthState = {
@@ -94,14 +96,21 @@ export const StudentAuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const loadStoredData = async () => {
       try {
-        const token = await AsyncStorage.getItem(STUDENT_TOKEN_KEY);
-        const studentData = await AsyncStorage.getItem(STUDENT_DATA_KEY);
+        const token = await getStudentSessionToken();
+        const studentData = await AsyncStorage.getItem(SESSION_KEYS.studentData);
 
         if (token && studentData) {
+          const isSessionValid = await api.verifyStoredSession("student");
+          if (!isSessionValid) {
+            dispatch({ type: "SET_LOADING", payload: false });
+            return;
+          }
+
+          const refreshedToken = await getStudentSessionToken();
           const student = JSON.parse(studentData);
           dispatch({
             type: "LOGIN_SUCCESS",
-            payload: { student, token },
+            payload: { student, token: refreshedToken || token },
           });
         } else {
           dispatch({ type: "SET_LOADING", payload: false });
@@ -130,11 +139,15 @@ export const StudentAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         },
       });
 
-      await AsyncStorage.setItem(STUDENT_TOKEN_KEY, response.token);
-      await AsyncStorage.setItem(
-        STUDENT_DATA_KEY,
-        JSON.stringify(response.student),
-      );
+      await setStudentSessionToken(response.token);
+      await AsyncStorage.multiRemove([
+        SESSION_KEYS.userData,
+        SESSION_KEYS.invigilatorData,
+      ]);
+      await AsyncStorage.multiSet([
+        [SESSION_KEYS.userType, "student"],
+        [SESSION_KEYS.studentData, JSON.stringify(response.student)],
+      ]);
     } catch (error) {
       dispatch({
         type: "LOGIN_FAILURE",
@@ -146,7 +159,7 @@ export const StudentAuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const logout = async () => {
     try {
-      await AsyncStorage.multiRemove([STUDENT_TOKEN_KEY, STUDENT_DATA_KEY]);
+      await api.logout("student");
       dispatch({ type: "LOGOUT" });
     } catch (error) {
       console.error("Logout error:", error);
@@ -220,7 +233,10 @@ export const StudentAuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     dispatch({ type: "UPDATE_STUDENT", payload: mergedPayload });
     const updatedStudent = { ...state.student, ...mergedPayload };
-    await AsyncStorage.setItem(STUDENT_DATA_KEY, JSON.stringify(updatedStudent));
+    await AsyncStorage.setItem(
+      SESSION_KEYS.studentData,
+      JSON.stringify(updatedStudent),
+    );
   };
 
   const contextValue: StudentAuthContextType = {

@@ -2,9 +2,16 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { API_BASE_URL } from "../_config/api";
+import {
+  SESSION_KEYS,
+  getInvigilatorSessionToken,
+  setInvigilatorRefreshToken,
+  setInvigilatorSessionToken,
+} from "./secureSession";
 
 interface LoginResponse {
   token: string;
+  refreshToken?: string;
   user: {
     _id: string;
     userName: string;
@@ -74,8 +81,18 @@ export const login = async (
       throw new Error("Login failed - invalid response format");
     }
 
+    const refreshToken =
+      response.data.refreshToken || response.data.data?.refreshToken;
+
+    await setInvigilatorSessionToken(response.data.accessToken);
+    if (refreshToken) {
+      await setInvigilatorRefreshToken(refreshToken);
+    }
+    await AsyncStorage.setItem(SESSION_KEYS.userType, "invigilator");
+
     return {
       token: response.data.accessToken,
+      refreshToken,
       user: {
         _id: response.data.user._id,
         userName: response.data.user.userName,
@@ -121,7 +138,7 @@ export const updateProfile = async (
   try {
     const response = await axios.put(`${API_BASE_URL}/users/${userId}`, data, {
       headers: {
-        Authorization: `Bearer ${await AsyncStorage.getItem("authToken")}`,
+        Authorization: `Bearer ${await getInvigilatorSessionToken()}`,
       },
     });
     return response.data;
@@ -135,7 +152,7 @@ export const deleteAccount = async (userId: string) => {
   try {
     const response = await axios.delete(`${API_BASE_URL}/users/${userId}`, {
       headers: {
-        Authorization: `Bearer ${await AsyncStorage.getItem("authToken")}`,
+        Authorization: `Bearer ${await getInvigilatorSessionToken()}`,
       },
     });
     return response.data;
