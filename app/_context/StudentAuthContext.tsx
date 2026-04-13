@@ -1,6 +1,13 @@
 // app/_context/StudentAuthContext.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, useContext, useEffect, useReducer } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useReducer,
+} from "react";
 import api from "../_services/api";
 import {
   SESSION_KEYS,
@@ -216,7 +223,7 @@ export const StudentAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return await api.getStudentProfile(studentId);
   };
 
-  const updateStudent = async (payload: Partial<Student>) => {
+  const updateStudent = useCallback(async (payload: Partial<Student>) => {
     if (!state.student) {
       return;
     }
@@ -231,15 +238,24 @@ export const StudentAuthProvider: React.FC<{ children: React.ReactNode }> = ({
         : state.student.lecturerEvaluations,
     };
 
+    const hasChanges = Object.entries(mergedPayload).some(([key, value]) => {
+      const currentValue = (state.student as any)[key];
+      return JSON.stringify(currentValue) !== JSON.stringify(value);
+    });
+
+    if (!hasChanges) {
+      return;
+    }
+
     dispatch({ type: "UPDATE_STUDENT", payload: mergedPayload });
     const updatedStudent = { ...state.student, ...mergedPayload };
     await AsyncStorage.setItem(
       SESSION_KEYS.studentData,
       JSON.stringify(updatedStudent),
     );
-  };
+  }, [state.student]);
 
-  const contextValue: StudentAuthContextType = {
+  const contextValue: StudentAuthContextType = useMemo(() => ({
     student: state.student,
     isLoading: state.isLoading,
     error: state.error,
@@ -255,7 +271,14 @@ export const StudentAuthProvider: React.FC<{ children: React.ReactNode }> = ({
     getStudentExamCards,
     getStudentProfile,
     updateStudent,
-  };
+  }), [
+    state.student,
+    state.isLoading,
+    state.error,
+    state.isAuthenticated,
+    state.token,
+    updateStudent,
+  ]);
   
   return (
     <StudentAuthContext.Provider value={contextValue}>
