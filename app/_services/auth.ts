@@ -109,7 +109,7 @@ export const login = async (
 
 export const verifyToken = async (token: string): Promise<boolean> => {
   try {
-    const response = await axios.post(`${API_BASE_URL}/verify-token`, null, {
+    const response = await axios.post(`${API_BASE_URL}/verify-token`, {}, {
       headers: { Authorization: `Bearer ${token}` },
     });
     return response.status === 200;
