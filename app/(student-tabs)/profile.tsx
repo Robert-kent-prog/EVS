@@ -15,6 +15,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useStudentAuth } from "../_context/StudentAuthContext";
 import api from "../_services/api";
 import { studentTheme } from "../_theme/studentTheme";
 import { AttendanceOverview, AttendanceTimetableEntry } from "../_types";
@@ -67,6 +68,8 @@ const formatWeekRange = (startDate: string, endDate: string) => {
 
 export default function StudentAttendanceScreen() {
   const insets = useSafeAreaInsets();
+  const { student, updateStudent } = useStudentAuth();
+  const currentAttendance = Number(student?.attendance ?? 0);
   const [overview, setOverview] = useState<AttendanceOverview | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -88,6 +91,14 @@ export default function StudentAttendanceScreen() {
       setLoadError(null);
       const response = await api.getAttendanceOverview();
       setOverview(response);
+      const backendAttendance = Number(
+        response.metrics.attendancePercentage ?? 0,
+      );
+      if (backendAttendance !== currentAttendance) {
+        await updateStudent({
+          attendance: backendAttendance,
+        });
+      }
       setSemesterStartDate(
         response.timetableConfig.semesterStartDate || todaysDateISO(),
       );
@@ -106,7 +117,7 @@ export default function StudentAttendanceScreen() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [currentAttendance, updateStudent]);
 
   useFocusEffect(
     useCallback(() => {
@@ -249,11 +260,13 @@ export default function StudentAttendanceScreen() {
   const handleSignClass = async (
     unitCode: string,
     startTime: string,
+    classDate: string,
+    weekIndex: number,
     cellKey: string,
   ) => {
     setSigningKey(cellKey);
     try {
-      await api.signClassAttendance({ unitCode, startTime });
+      await api.signClassAttendance({ unitCode, startTime, classDate, weekIndex });
       Alert.alert("Signed", "Attendance signed successfully.");
       await loadOverview();
     } catch (error: any) {
@@ -451,12 +464,18 @@ export default function StudentAttendanceScreen() {
                             <TouchableOpacity
                               style={styles.cellSignButton}
                               onPress={() =>
-                                handleSignClass(row.unitCode, row.startTime, cellKey)
+                                handleSignClass(
+                                  row.unitCode,
+                                  row.startTime,
+                                  cell.classDate,
+                                  cell.weekIndex,
+                                  cellKey,
+                                )
                               }
                               disabled={signingKey === cellKey}
                             >
                               <Text style={styles.cellSignText}>
-                                {signingKey === cellKey ? "..." : "Sign"}
+                                {signingKey === cellKey ? "..." : "Tick"}
                               </Text>
                             </TouchableOpacity>
                           ) : (
