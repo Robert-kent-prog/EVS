@@ -7,6 +7,9 @@ export interface AttendanceRecord {
   fullName: string;
   status: string; // "eligible" or "not_eligible"
   academicYear: string;
+  unitCode?: string | null;
+  unitName?: string | null;
+  reason?: string | null;
   timestamp: string; // ISO timestamp
   verificationMethod: "exam_card" | "manual";
 }
@@ -44,6 +47,9 @@ export async function initializeDatabase() {
       fullName TEXT NOT NULL,
       status TEXT NOT NULL CHECK(status IN ('eligible', 'not_eligible')),
       academicYear TEXT NOT NULL,
+      unitCode TEXT,
+      unitName TEXT,
+      reason TEXT,
       timestamp TEXT NOT NULL,
       verificationMethod TEXT NOT NULL CHECK(verificationMethod IN ('exam_card', 'manual')),
       UNIQUE(studentId, timestamp)
@@ -53,6 +59,23 @@ export async function initializeDatabase() {
     CREATE INDEX IF NOT EXISTS idx_timestamp ON attendance_records(timestamp);
     CREATE INDEX IF NOT EXISTS idx_status ON attendance_records(status);
   `);
+
+  const tableColumns = await db.getAllAsync<{ name: string }>(
+    "PRAGMA table_info(attendance_records)",
+  );
+  const columnNames = new Set(tableColumns.map((column) => column.name));
+
+  if (!columnNames.has("unitCode")) {
+    await db.execAsync("ALTER TABLE attendance_records ADD COLUMN unitCode TEXT");
+  }
+
+  if (!columnNames.has("unitName")) {
+    await db.execAsync("ALTER TABLE attendance_records ADD COLUMN unitName TEXT");
+  }
+
+  if (!columnNames.has("reason")) {
+    await db.execAsync("ALTER TABLE attendance_records ADD COLUMN reason TEXT");
+  }
 
   // Keep the local DB lean by pruning stale history.
   await db.runAsync(
@@ -75,11 +98,54 @@ export async function storeAttendanceRecord(
       throw new Error("Database connection not available");
     }
 
+    const scannedUnitCode = (
+      studentData.verifiedUnit ||
+      studentData.unitCode ||
+      ""
+    )
+      .toString()
+      .trim()
+      .toUpperCase();
+    const scannedUnitName = (studentData.unitName || "").toString().trim();
+    const registeredCourses = Array.isArray(studentData.registeredCourses)
+      ? studentData.registeredCourses
+      : [];
+    const matchedCourse = scannedUnitCode
+      ? registeredCourses.find(
+          (course: any) =>
+            course?.courseCode?.toString().trim().toUpperCase() === scannedUnitCode,
+        )
+      : null;
+
+    let status: AttendanceRecord["status"] = studentData.isEligible
+      ? "eligible"
+      : "not_eligible";
+    let reason = studentData.isEligible
+      ? "Eligible for the current verification."
+      : "Student is not eligible for examinations.";
+
+    if (scannedUnitCode) {
+      if (!matchedCourse) {
+        status = "not_eligible";
+        reason = `Not registered for the current unit (${scannedUnitCode})`;
+      } else if (!matchedCourse.isVerified) {
+        status = "not_eligible";
+        reason = `Unit registration exists but is not verified for the current unit (${scannedUnitCode})`;
+      } else if (studentData.isEligible) {
+        status = "eligible";
+        reason = `Registered for the current unit (${scannedUnitCode})`;
+      }
+    }
+
     const record: Omit<AttendanceRecord, "id"> = {
       studentId: studentData.studentId,
       fullName: studentData.fullName,
-      status: studentData.isEligible ? "eligible" : "not_eligible",
-      academicYear: studentData.academicYear,
+      status,
+      academicYear: studentData.academicYear || "N/A",
+      unitCode: scannedUnitCode || null,
+      unitName:
+        scannedUnitName || matchedCourse?.courseName || scannedUnitCode || null,
+      reason,
       timestamp: new Date().toISOString(),
       verificationMethod,
     };
@@ -88,20 +154,24 @@ export async function storeAttendanceRecord(
       `SELECT id
        FROM attendance_records
        WHERE studentId = ?
+       AND COALESCE(unitCode, '') = COALESCE(?, '')
        AND DATE(timestamp) = DATE('now')
        LIMIT 1`,
-      [record.studentId],
+      [record.studentId, record.unitCode],
     );
 
     if (existingToday?.id) {
       await db.runAsync(
         `UPDATE attendance_records
-         SET fullName = ?, status = ?, academicYear = ?, timestamp = ?, verificationMethod = ?
+         SET fullName = ?, status = ?, academicYear = ?, unitCode = ?, unitName = ?, reason = ?, timestamp = ?, verificationMethod = ?
          WHERE id = ?`,
         [
           record.fullName,
           record.status,
           record.academicYear,
+          record.unitCode,
+          record.unitName,
+          record.reason,
           record.timestamp,
           record.verificationMethod,
           existingToday.id,
@@ -112,13 +182,16 @@ export async function storeAttendanceRecord(
 
     const result = await db.runAsync(
       `INSERT INTO attendance_records 
-       (studentId, fullName, status, academicYear, timestamp, verificationMethod)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+       (studentId, fullName, status, academicYear, unitCode, unitName, reason, timestamp, verificationMethod)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         record.studentId,
         record.fullName,
         record.status,
         record.academicYear,
+        record.unitCode,
+        record.unitName,
+        record.reason,
         record.timestamp,
         record.verificationMethod,
       ],
