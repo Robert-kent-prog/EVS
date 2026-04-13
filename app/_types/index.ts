@@ -144,6 +144,13 @@ export interface AttendanceTimetablePayload {
   timetable: AttendanceTimetableEntry[];
 }
 
+export interface AttendanceSignPayload {
+  unitCode: string;
+  startTime: string;
+  classDate?: string;
+  weekIndex?: number;
+}
+
 export interface LecturerEvaluationPayload {
   degreeProgramme: string;
   yearOfStudy: "One" | "Two" | "Three" | "Four" | "Other";
