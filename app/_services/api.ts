@@ -229,7 +229,7 @@ class ApiService {
     }
 
     try {
-      const response = await this.api.post("/verify-token", null, {
+      const response = await this.api.post("/verify-token", {}, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
@@ -639,6 +639,8 @@ class ApiService {
   async signClassAttendance(payload: {
     unitCode: string;
     startTime: string;
+    classDate?: string;
+    weekIndex?: number;
   }): Promise<{
     signature: {
       classDate: string;
