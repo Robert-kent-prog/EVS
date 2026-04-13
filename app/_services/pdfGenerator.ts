@@ -124,7 +124,8 @@ export async function generateAttendancePDF(
               width: 100%;
               border-collapse: collapse;
               margin: 20px 0 30px 0;
-              font-size: 11px;
+              font-size: 10px;
+              table-layout: fixed;
             }
             th {
               background-color: #f8f9fa;
@@ -138,6 +139,8 @@ export async function generateAttendancePDF(
               border: 1px solid #ddd;
               padding: 10px 8px;
               vertical-align: top;
+              word-break: break-word;
+              overflow-wrap: anywhere;
             }
             .serial-cell {
               text-align: center;
@@ -270,8 +273,10 @@ export async function generateAttendancePDF(
                 <th>Student ID</th>
                 <th>Full Name</th>
                 <th>Status</th>
+                <th style="width: 15%;">Unit</th>
+                <th style="width: 18%;">Reason</th>
                 <th>Academic Year</th>
-                <th>Scanned At</th>
+                <th style="width: 14%;">Scanned At</th>
                 <th>Method</th>
               </tr>
             </thead>
@@ -286,6 +291,8 @@ export async function generateAttendancePDF(
                   <td class="${record.status === "eligible" ? "status-eligible" : "status-ineligible"}">
                     ${record.status === "eligible" ? "ELIGIBLE" : "NOT ELIGIBLE"}
                   </td>
+                  <td>${record.unitCode || ""}${record.unitName ? ` - ${record.unitName}` : ""}</td>
+                  <td>${record.reason || ""}</td>
                   <td>${record.academicYear}</td>
                   <td>${new Date(record.timestamp).toLocaleString()}</td>
                   <td class="method-cell">
