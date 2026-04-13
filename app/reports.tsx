@@ -83,6 +83,10 @@ export default function ReportsScreen() {
           studentId: record.studentId,
           fullName: record.fullName,
           status: record.status,
+          academicYear: record.academicYear,
+          unitCode: record.unitCode,
+          unitName: record.unitName,
+          reason: record.reason,
           timestamp: record.timestamp,
         })),
         summary: {
@@ -278,10 +282,25 @@ export default function ReportsScreen() {
             Academic Year: {item.academicYear}
           </Text>
         </View>
+        {!!item.unitCode && (
+          <View style={styles.detailRow}>
+            <MaterialIcons name="class" size={14} color="#666" />
+            <Text style={styles.detailText}>
+              Unit: {item.unitCode}
+              {item.unitName ? ` - ${item.unitName}` : ""}
+            </Text>
+          </View>
+        )}
         <View style={styles.detailRow}>
           <MaterialIcons name="schedule" size={14} color="#666" />
           <Text style={styles.detailText}>{formatTime(item.timestamp)}</Text>
         </View>
+        {!!item.reason && (
+          <View style={styles.detailRow}>
+            <MaterialIcons name="info-outline" size={14} color="#666" />
+            <Text style={styles.detailText}>{item.reason}</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.footer}>
