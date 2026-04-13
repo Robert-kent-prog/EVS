@@ -20,23 +20,30 @@ import { studentTheme } from "../_theme/studentTheme";
 import { EligibilityStatus } from "../_types";
 
 export default function StudentDashboard() {
-  const { student, logout } = useStudentAuth();
+  const { student, logout, updateStudent } = useStudentAuth();
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const studentId = student?.studentId;
+  const currentAttendance = Number(student?.attendance ?? 0);
   const [refreshing, setRefreshing] = useState(false);
   const [eligibility, setEligibility] = useState<EligibilityStatus | null>(null);
   const [loading, setLoading] = useState(false);
 
   const loadEligibility = useCallback(async () => {
-    if (student) {
+    if (studentId) {
       try {
-        const result = await api.checkEligibility(student.studentId);
+        const result = await api.checkEligibility(studentId);
         setEligibility(result);
+        if (Number(result.attendance ?? 0) !== currentAttendance) {
+          await updateStudent({
+            attendance: result.attendance,
+          });
+        }
       } catch (error) {
         console.error("Error checking eligibility:", error);
       }
     }
-  }, [student]);
+  }, [studentId, currentAttendance, updateStudent]);
 
   useEffect(() => {
     loadEligibility();
